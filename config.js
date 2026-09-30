@@ -7,7 +7,7 @@ window.TIENDA = {
 
   // Tu número de WhatsApp con indicativo de Colombia (57), sin espacios ni "+".
   // Aquí llegan los pedidos.
-  whatsapp: "573000000000",
+  whatsapp: "573177986779",
 
   // Enlace CSV de la hoja de Google con tus productos
   // (Archivo > Compartir > Publicar en la web > Formato CSV).
