@@ -83,7 +83,7 @@
   const ENC = "Por encargo", E = T.encargo || { anticipo: 0.4, dias: 20 };
   const pct = Math.round(E.anticipo * 100);
   const anticipo = v => Math.ceil(v * E.anticipo / 1000) * 1000;
-  const listaCats = () => { const c = ["Todos", ...new Set(productos.map(p => p.cat))]; if (productos.some(p => p.enc)) c.push(ENC); return c; };
+  const listaCats = () => { const c = ["Todos", ...new Set(productos.map(p => p.cat))]; c.push(ENC); return c; };
   const enCat = (p, c) => c === "Todos" || (c === ENC ? p.enc : p.cat === c);
   let carrito = [];
   try { carrito = JSON.parse(localStorage.getItem("jp-carrito") || "[]"); } catch { }
@@ -141,7 +141,14 @@
     $("titulo").textContent = q ? `Resultados para “${busqueda}”` : filtro === "Todos" ? "Productos destacados" : filtro;
     $("count").textContent = `${lista.length} producto${lista.length === 1 ? "" : "s"}`;
     const grid = $("grid"); grid.innerHTML = "";
-    if (!lista.length) { grid.innerHTML = '<p class="empty">No encontramos productos. Prueba con otra búsqueda.</p>'; return; }
+    $("enc-intro").hidden = filtro !== ENC || !!q;
+    if (filtro === ENC && !q) $("enc-intro").innerHTML = `<h3>⏳ Aparta productos innovadores</h3>
+      <p>Productos novedosos que traemos <b>bajo pedido</b>. Así funciona:</p>
+      <ol><li>Eliges el producto y lo apartas pagando solo el <b>${pct}%</b> de su valor.</li>
+      <li>Lo recibes en máximo <b>${E.dias} días hábiles</b> después de confirmar tu pago.</li>
+      <li>Pagas el resto cuando llegue. Si no llega a tiempo, te devolvemos tu anticipo.</li></ol>
+      <a href="legal.html#encargo">Ver condiciones</a>`;
+    if (!lista.length) { grid.innerHTML = filtro === ENC && !q ? '<p class="empty">Muy pronto publicaremos aquí productos innovadores para apartar. ¿Buscas algo en especial? Escríbenos por WhatsApp y te lo conseguimos.</p>' : '<p class="empty">No encontramos productos. Prueba con otra búsqueda.</p>'; return; }
     lista.forEach(p => {
       const off = p.antes > p.precio ? Math.round(100 - p.precio * 100 / p.antes) : 0;
       const el = document.createElement("article"); el.className = "card";
