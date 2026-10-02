@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#0a0907">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@800&family=Outfit:wght@400;600;800&display=swap">
-<link rel="stylesheet" href="styles.css?v=202610020618">
+<link rel="stylesheet" href="styles.css?v=202610021412">
 <style>
   .doc{background:var(--cream);color:var(--ink);padding-block:32px 56px}
   .doc .in{max-width:760px;display:grid;gap:8px}
@@ -31,7 +31,7 @@
   <h1>Información legal</h1>
   <p>Última actualización: <span id="fecha">octubre de 2026</span>.</p>
   <nav class="toc" aria-label="Secciones">
-    <a href="#vendedor">Vendedor</a><a href="#terminos">Términos</a><a href="#privacidad">Datos personales</a><a href="#retracto">Retracto</a><a href="#reversion">Reversión del pago</a><a href="#garantias">Garantías</a><a href="#pqrs">PQRS</a>
+    <a href="#vendedor">Vendedor</a><a href="#terminos">Términos</a><a href="#privacidad">Datos personales</a><a href="#cookies">Cookies</a><a href="#retracto">Retracto</a><a href="#reversion">Reversión del pago</a><a href="#garantias">Garantías</a><a href="#pqrs">PQRS</a>
   </nav>
 
   <h2 id="vendedor">Quién vende</h2>
@@ -72,8 +72,15 @@
   <p>Puedes conocer, actualizar, rectificar y pedir que se borren tus datos, revocar tu autorización y presentar quejas ante la Superintendencia de Industria y Comercio.</p>
   <h3>Cómo ejercerlos</h3>
   <p>Escríbenos al correo o WhatsApp de la sección <a href="#vendedor">Quién vende</a>. Respondemos consultas en máximo 10 días hábiles y reclamos en máximo 15 días hábiles.</p>
-  <h3>Almacenamiento en tu navegador</h3>
-  <p>La página solo guarda tu carrito en tu propio navegador para que no lo pierdas. No usamos cookies de publicidad.</p>
+
+  <h2 id="cookies">Política de cookies</h2>
+  <p>Las cookies son pequeños archivos que una página guarda en tu navegador. Esta tienda usa solo lo necesario para funcionar:</p>
+  <ul>
+    <li><strong>Tu carrito:</strong> se guarda en tu propio navegador (almacenamiento local) para que no pierdas los productos que elegiste. No se envía a nadie y puedes borrarlo vaciando el carrito o los datos de tu navegador.</li>
+    <li><strong>Seguridad:</strong> nuestro proveedor de alojamiento (Cloudflare) puede usar una cookie técnica para proteger la página de ataques y robots. No sirve para identificarte ni para publicidad.</li>
+    <li><strong>Tipos de letra:</strong> los tipos de letra se cargan desde Google Fonts, que puede recibir datos técnicos de conexión como tu dirección IP. No instala cookies.</li>
+  </ul>
+  <p><strong>No usamos cookies de publicidad, de seguimiento ni de análisis.</strong> Por eso no te pedimos aceptar cookies. Si en el futuro las usamos, te pediremos tu autorización antes, como exige la Ley 1581 de 2012.</p>
 
   <h2 id="retracto">Derecho de retracto y devoluciones</h2>
   <p>Como es una venta a distancia, tienes <strong>5 días hábiles desde que recibes el producto</strong> para arrepentirte de la compra (artículo 47 de la Ley 1480 de 2011).</p>
@@ -102,7 +109,7 @@
 
 <footer class="gutter"><div class="in"><span class="goldtxt">SANTA ROSA DEL SUR · BOLÍVAR</span><a class="back" href="index.html">Volver a la tienda</a></div></footer>
 
-<script src="config.js?v=202610020618"></script>
+<script src="config.js?v=202610021412"></script>
 <script>
   const T = window.TIENDA, E = { nombre: T.nombre, garantia: T.garantia, ...T.empresa };
   document.querySelectorAll("[data-e]").forEach(el => { el.textContent = E[el.dataset.e] || ""; });
