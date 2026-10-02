@@ -217,7 +217,7 @@
       `Quedo atento a la confirmación. ¡Gracias! 🙌`
     ].join("\n"));
   });
-  const ws = texto => window.open(`https://wa.me/${T.whatsapp}?text=${encodeURIComponent(texto)}`, "_blank", "noopener");
+  const ws = texto => window.open(`https://api.whatsapp.com/send?phone=${T.whatsapp}&text=${encodeURIComponent(texto)}`, "_blank", "noopener");
 
   // ---------- Envíos y demás ----------
   ["c-zona"].forEach(id => {
