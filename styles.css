@@ -63,7 +63,7 @@ header{position:sticky;top:0;z-index:10;background:var(--black);border-bottom:1p
 .empty{color:var(--muted)}
 .card{background:var(--card);border:1px solid var(--soft);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;min-width:0}
 .card .open{all:unset;cursor:pointer;display:flex;flex-direction:column;flex:1}
-.media{aspect-ratio:1/1;max-width:100%;background:#f1ece2;display:grid;place-items:center;position:relative;overflow:hidden}
+.media{aspect-ratio:1/1;max-width:100%;background:#fff;display:grid;place-items:center;position:relative;overflow:hidden}
 .media img{width:100%;height:100%;object-fit:cover}
 .ph{font:800 44px var(--f-logo);color:#ddd3bf}
 .badge{position:absolute;top:8px;left:8px;font:600 10px var(--f-body);text-transform:uppercase;letter-spacing:.08em;padding:3px 8px;border-radius:5px;background:var(--black);color:var(--gold)}
@@ -104,7 +104,7 @@ dialog{border:1px solid var(--gold-lo);border-radius:16px;background:var(--cream
 dialog::backdrop{background:rgba(0,0,0,.7)}
 .cerrar{position:absolute;top:8px;right:12px;background:none;border:0;font-size:30px;line-height:1;cursor:pointer;color:inherit}
 .det{display:grid;grid-template-columns:1.1fr 1fr;gap:24px}
-.gal-main{aspect-ratio:1/1;max-width:100%;background:#f1ece2;border-radius:12px;overflow:hidden;display:grid;place-items:center}
+.gal-main{aspect-ratio:1/1;max-width:100%;background:#fff;border-radius:12px;overflow:hidden;display:grid;place-items:center}
 .gal-main img,.gal-main iframe{width:100%;height:100%;object-fit:contain;border:0}
 .gal-th{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
 .gal-th button{width:56px;height:56px;padding:0;border:1px solid var(--soft);border-radius:8px;overflow:hidden;cursor:pointer;background:#f1ece2;font-size:11px}

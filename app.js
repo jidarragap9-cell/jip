@@ -68,7 +68,7 @@
       antes: num(g(r, "antes")),
       cat: g(r, "cat") || "Otros",
       specs: g(r, "specs").split(/\n|;|•/).map(s => s.trim()).filter(Boolean),
-      fotos: g(r, "fotos").split(/[\s,]+/).filter(u => /^https?:/.test(u)).map(toImg),
+      fotos: g(r, "fotos").split(/[\s,]+/).filter(u => /^(https?:|img\/)/.test(u)).map(toImg),
       video: toVideo(g(r, "video")),
       peso: num(g(r, "peso")) || 1,
       dest: si(g(r, "dest")),
