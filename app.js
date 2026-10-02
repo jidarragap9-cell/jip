@@ -220,7 +220,7 @@
   const ws = texto => window.open(`https://wa.me/${T.whatsapp}?text=${encodeURIComponent(texto)}`, "_blank", "noopener");
 
   // ---------- Envíos y demás ----------
-  ["e-zona", "c-zona"].forEach(id => {
+  ["c-zona"].forEach(id => {
     const grupos = {};
     T.envios.forEach((z, i) => {
       const g = z.grupo || "Destinos";
@@ -228,8 +228,6 @@
       grupos[g].append(new Option(z.valor ? `${z.zona} · ${fmt(z.valor)}` : `${z.zona} · Gratis`, i));
     });
   });
-  const calc = () => { const z = T.envios[$("e-zona").value]; $("e-out").innerHTML = `<small>Valor estimado</small><b class="goldtxt">${fmtEnv(envio(z))}</b><small>${z.tiempo} · ${z.via || ""}</small>`; };
-  $("e-zona").onchange = calc; $("calc").onsubmit = e => e.preventDefault();
   T.pagos.forEach(p => { $("c-pago").add(new Option(p)); $("pagos").insertAdjacentHTML("beforeend", `<span class="chip">${esc(p)}</span>`); });
   $("anio").textContent = `© ${new Date().getFullYear()} ${T.nombre}`;
   $("abrirCarrito").onclick = abrirCarrito;
@@ -251,5 +249,5 @@
     }
     pintar();
   }
-  contador(); calc(); cargar();
+  contador(); cargar();
 })();
