@@ -154,7 +154,7 @@
     guardar(); contador();
   }
   const contador = () => { $("nCart").textContent = carrito.reduce((a, i) => a + i.cant, 0); };
-  const envio = (z, kg) => z.base + z.porKg * Math.max(0.5, kg);
+  const envio = z => z.valor || 0;
   const fmtEnv = v => (v ? fmt(v) : "Gratis");
   function abrirCarrito() { pintarCarrito(); $("carrito").showModal(); }
   function pintarCarrito() {
@@ -165,8 +165,12 @@
     carrito.forEach((i, k) => {
       const d = document.createElement("div"); d.className = "item";
       d.innerHTML = `${i.foto ? `<img src="${esc(i.foto)}" alt="">` : '<span class="mini"></span>'}
-        <div><p>${esc(i.nombre)}</p><small>${i.cant} × ${fmt(i.precio)}</small></div>
+        <div><p>${esc(i.nombre)}</p><small>${fmt(i.precio)} c/u · ${fmt(i.precio * i.cant)}</small>
+          <div class="qty sm"><button type="button" class="m" aria-label="Quitar una unidad">−</button><span>${i.cant}</span><button type="button" class="p" aria-label="Agregar una unidad">+</button></div></div>
         <button class="x" type="button">Quitar</button>`;
+      const cambiar = n => { i.cant += n; if (i.cant < 1) carrito.splice(k, 1); guardar(); contador(); pintarCarrito(); };
+      d.querySelector(".m").onclick = () => cambiar(-1);
+      d.querySelector(".p").onclick = () => cambiar(1);
       d.querySelector(".x").onclick = () => { carrito.splice(k, 1); guardar(); contador(); pintarCarrito(); };
       box.append(d);
     });
@@ -178,7 +182,7 @@
     const z = T.envios[$("c-zona").value];
     const env = envio(z, kg);
     $("c-tot").innerHTML = `<div><span>Productos</span><span>${fmt(sub)}</span></div>
-      <div><span>Envío estimado (${kg.toLocaleString("es-CO")} kg)</span><span>${fmtEnv(env)}</span></div>
+      <div><span>Envío a ${esc(z.zona)}</span><span>${fmtEnv(env)}</span></div>
       <div class="g"><span>Total</span><span>${fmt(sub + env)}</span></div>`;
     return { sub, kg, env, z };
   }
@@ -192,9 +196,16 @@
   const ws = texto => window.open(`https://wa.me/${T.whatsapp}?text=${encodeURIComponent(texto)}`, "_blank", "noopener");
 
   // ---------- Envíos y demás ----------
-  T.envios.forEach((z, i) => { $("e-zona").add(new Option(z.zona, i)); $("c-zona").add(new Option(z.zona, i)); });
-  const calc = () => { const z = T.envios[$("e-zona").value]; $("e-out").innerHTML = `<small>Valor estimado</small><b class="goldtxt">${fmtEnv(envio(z, +$("e-kg").value || 0))}</b><small>${z.tiempo} · ${z.via || ""}</small>`; };
-  $("e-zona").onchange = $("e-kg").oninput = calc; $("calc").onsubmit = e => e.preventDefault();
+  ["e-zona", "c-zona"].forEach(id => {
+    const grupos = {};
+    T.envios.forEach((z, i) => {
+      const g = z.grupo || "Destinos";
+      if (!grupos[g]) { grupos[g] = document.createElement("optgroup"); grupos[g].label = g; $(id).append(grupos[g]); }
+      grupos[g].append(new Option(z.valor ? `${z.zona} · ${fmt(z.valor)}` : `${z.zona} · Gratis`, i));
+    });
+  });
+  const calc = () => { const z = T.envios[$("e-zona").value]; $("e-out").innerHTML = `<small>Valor estimado</small><b class="goldtxt">${fmtEnv(envio(z))}</b><small>${z.tiempo} · ${z.via || ""}</small>`; };
+  $("e-zona").onchange = calc; $("calc").onsubmit = e => e.preventDefault();
   T.pagos.forEach(p => { $("c-pago").add(new Option(p)); $("pagos").insertAdjacentHTML("beforeend", `<span class="chip">${esc(p)}</span>`); });
   $("anio").textContent = `© ${new Date().getFullYear()} ${T.nombre}`;
   $("abrirCarrito").onclick = abrirCarrito;
