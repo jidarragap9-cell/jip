@@ -7,8 +7,8 @@ window.TIENDA = {
 
   // Datos legales del vendedor (obligatorios por ley). Completa cuando tengas RUT/NIT.
   empresa: {
-    titular: "Jonatan Idarraga Parra",
-    nit: "C.C. 1.098.821.670",
+    titular: "Jonatan Idarraga Parra y Jenny Idarraga Parra",
+    nit: "C.C. 1.098.821.670 (Jonatan Idarraga Parra)",
     direccion: "Santa Rosa del Sur, Bolívar, Colombia",
     correo: "jipdelsur2026@gmail.com",
     telefono: "317 798 6779"
