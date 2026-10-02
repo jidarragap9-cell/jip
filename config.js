@@ -10,7 +10,7 @@ window.TIENDA = {
     titular: "PENDIENTE: nombre completo o razón social",
     nit: "PENDIENTE: NIT o cédula",
     direccion: "Santa Rosa del Sur, Bolívar, Colombia",
-    correo: "PENDIENTE: correo de la tienda",
+    correo: "jipdelsur2026@gmail.com",
     telefono: "317 798 6779"
   },
 
