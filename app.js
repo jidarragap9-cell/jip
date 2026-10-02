@@ -15,6 +15,7 @@
     calzado: '<path d="M3 16c0-3 1-7 3-9l4 3c2 1 5 2 8 3 2 .5 3 2 3 3v2H3z"/>',
     perfumeria: '<rect x="6" y="9" width="12" height="12" rx="2"/><path d="M10 9V6h4v3M12 3v3"/>',
     electrodomesticos: '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M5 9h14M9 6h.01"/>',
+    "por encargo": '<circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/>',
     otros: '<circle cx="12" cy="12" r="9"/><path d="M8 12h.01M12 12h.01M16 12h.01"/>'
   };
   const icon = c => ICON[norm(c)] || ICON.otros;
@@ -58,7 +59,7 @@
     const c = {
       nombre: col("nombre", "producto"), precio: head.findIndex(h => h.startsWith("precio") && !h.includes("antes")),
       antes: col("antes", "anterior"), cat: col("categor"), specs: col("caracter", "especific", "descrip"),
-      fotos: col("foto", "imagen"), video: col("video"), peso: col("peso"), dest: col("destac", "ganador"), ocultar: col("ocultar", "agotado")
+      fotos: col("foto", "imagen"), video: col("video"), peso: col("peso"), dest: col("destac", "ganador"), ocultar: col("ocultar", "agotado"), enc: col("encargo")
     };
     const g = (r, k) => (c[k] >= 0 ? (r[c[k]] || "").trim() : "");
     return rows.map((r, i) => ({
@@ -72,19 +73,25 @@
       video: toVideo(g(r, "video")),
       peso: num(g(r, "peso")) || 1,
       dest: si(g(r, "dest")),
-      ocultar: si(g(r, "ocultar"))
+      ocultar: si(g(r, "ocultar")),
+      enc: si(g(r, "enc"))
     })).filter(p => p.nombre && p.precio && !p.ocultar).reverse(); // lo más nuevo primero
   }
 
   // ---------- Estado ----------
   let productos = [], filtro = "Todos", busqueda = "";
+  const ENC = "Por encargo", E = T.encargo || { anticipo: 0.4, dias: 20 };
+  const pct = Math.round(E.anticipo * 100);
+  const anticipo = v => Math.ceil(v * E.anticipo / 1000) * 1000;
+  const listaCats = () => { const c = ["Todos", ...new Set(productos.map(p => p.cat))]; if (productos.some(p => p.enc)) c.push(ENC); return c; };
+  const enCat = (p, c) => c === "Todos" || (c === ENC ? p.enc : p.cat === c);
   let carrito = [];
   try { carrito = JSON.parse(localStorage.getItem("jp-carrito") || "[]"); } catch { }
   const guardar = () => { try { localStorage.setItem("jp-carrito", JSON.stringify(carrito)); } catch { } };
 
   // ---------- Vitrina ----------
   function categorias() {
-    const cats = ["Todos", ...new Set(productos.map(p => p.cat))];
+    const cats = listaCats();
     $("icons").innerHTML = ""; $("nav").innerHTML = "";
     const all = document.createElement("button"); all.type = "button"; all.className = "all"; all.textContent = "☰ Categorías";
     all.setAttribute("aria-haspopup", "true"); all.setAttribute("aria-expanded", "false");
@@ -108,9 +115,9 @@
   function menuCats(btn) {
     if ($("menuCats")) { cerrarMenu(); return; }
     const m = document.createElement("div"); m.id = "menuCats"; m.setAttribute("role", "menu");
-    const cats = ["Todos", ...new Set(productos.map(p => p.cat))];
+    const cats = listaCats();
     cats.forEach(c => {
-      const n = c === "Todos" ? productos.length : productos.filter(p => p.cat === c).length;
+      const n = productos.filter(p => enCat(p, c)).length;
       const b = document.createElement("button"); b.type = "button"; b.setAttribute("role", "menuitem");
       if (c === filtro) b.className = "on";
       b.innerHTML = `<svg viewBox="0 0 24 24">${icon(c)}</svg><span>${esc(c)}</span><small>${n}</small>`;
@@ -129,7 +136,7 @@
   function pintar() {
     categorias();
     const q = norm(busqueda);
-    let lista = productos.filter(p => (filtro === "Todos" || p.cat === filtro) && (!q || norm(p.nombre + " " + p.cat + " " + p.specs.join(" ")).includes(q)));
+    let lista = productos.filter(p => enCat(p, filtro) && (!q || norm(p.nombre + " " + p.cat + " " + p.specs.join(" ")).includes(q)));
     if (filtro === "Todos" && !q) lista = [...lista.filter(p => p.dest), ...lista.filter(p => !p.dest)];
     $("titulo").textContent = q ? `Resultados para “${busqueda}”` : filtro === "Todos" ? "Productos destacados" : filtro;
     $("count").textContent = `${lista.length} producto${lista.length === 1 ? "" : "s"}`;
@@ -140,11 +147,12 @@
       const el = document.createElement("article"); el.className = "card";
       el.innerHTML = `<button class="open" type="button" aria-label="Ver ${esc(p.nombre)}">
         <div class="media">${p.fotos[0] ? `<img src="${esc(p.fotos[0])}" alt="" loading="lazy">` : '<span class="ph">J&amp;P</span>'}
-        ${p.dest ? '<span class="badge">Destacado</span>' : ""}${off ? `<span class="badge off">-${off}%</span>` : ""}</div>
+        ${p.dest ? '<span class="badge">Destacado</span>' : ""}${off ? `<span class="badge off">-${off}%</span>` : ""}${p.enc ? '<span class="badge enc">⏳ Por encargo</span>' : ""}</div>
         <div class="body"><h3>${esc(p.nombre)}</h3>
         <ul class="specs">${p.specs.slice(0, 2).map(s => `<li>${esc(s)}</li>`).join("")}</ul>
-        <div class="price"><b>${fmt(p.precio)}</b>${off ? `<s>${fmt(p.antes)}</s>` : ""}</div></div></button>
-        <button class="buy" type="button">Agregar al carrito</button>`;
+        <div class="price"><b>${fmt(p.precio)}</b>${off ? `<s>${fmt(p.antes)}</s>` : ""}</div>
+        ${p.enc ? `<p class="sep">Sepáralo con <b>${fmt(anticipo(p.precio))}</b> · llega en ${E.dias} días hábiles</p>` : ""}</div></button>
+        <button class="buy" type="button">${p.enc ? "Separar por encargo" : "Agregar al carrito"}</button>`;
       el.querySelector(".open").onclick = () => abrir(p);
       el.querySelector(".buy").onclick = e => { agregar(p, 1); e.target.textContent = "Agregado ✓"; aviso(`✨ ¡Buena elección! ${p.nombre} ya está en tu carrito`); };
       grid.append(el);
@@ -158,6 +166,11 @@
     $("d-cat").textContent = p.cat; $("d-nombre").textContent = p.nombre;
     $("d-precio").innerHTML = `<b>${fmt(p.precio)}</b>${p.antes > p.precio ? `<s>${fmt(p.antes)}</s>` : ""}`;
     $("d-specs").innerHTML = p.specs.map(s => `<li>${esc(s)}</li>`).join("");
+    $("d-enc").hidden = !p.enc;
+    if (p.enc) $("d-enc").innerHTML = `<b>⏳ Producto por encargo</b>
+      <span>Sepáralo con el ${pct}%: <b>${fmt(anticipo(p.precio))}</b>. El resto (${fmt(p.precio - anticipo(p.precio))}) lo pagas cuando llegue.</span>
+      <span>Llega en máximo ${E.dias} días hábiles después de confirmar tu pago.</span>`;
+    $("d-agregar").textContent = p.enc ? "Separar por encargo" : "Agregar al carrito";
     const medios = [...p.fotos.map(src => ({ t: "img", src })), ...(p.video ? [{ t: "vid", src: p.video }] : [])];
     const ver = m => { $("d-main").innerHTML = !m ? '<span class="ph">J&amp;P</span>' : m.t === "img" ? `<img src="${esc(m.src)}" alt="${esc(p.nombre)}">` : `<iframe src="${esc(m.src)}" allow="autoplay; encrypted-media" allowfullscreen title="Video"></iframe>`; };
     ver(medios[0]);
@@ -177,7 +190,7 @@
   // ---------- Carrito ----------
   function agregar(p, n) {
     const it = carrito.find(i => i.nombre === p.nombre);
-    if (it) it.cant += n; else carrito.push({ nombre: p.nombre, precio: p.precio, peso: p.peso, foto: p.fotos[0] || "", cant: n });
+    if (it) it.cant += n; else carrito.push({ nombre: p.nombre, precio: p.precio, peso: p.peso, foto: p.fotos[0] || "", enc: !!p.enc, cant: n });
     guardar(); contador();
   }
   let avisoT;
@@ -199,7 +212,7 @@
     carrito.forEach((i, k) => {
       const d = document.createElement("div"); d.className = "item";
       d.innerHTML = `${i.foto ? `<img src="${esc(i.foto)}" alt="">` : '<span class="mini"></span>'}
-        <div><p>${esc(i.nombre)}</p><small>${fmt(i.precio)} c/u · ${fmt(i.precio * i.cant)}</small>
+        <div><p>${i.enc ? '<span class="tag-enc">⏳ Por encargo</span> ' : ""}${esc(i.nombre)}</p><small>${fmt(i.precio)} c/u · ${fmt(i.precio * i.cant)}</small>
           <div class="qty sm"><button type="button" class="m" aria-label="Quitar una unidad">−</button><span>${i.cant}</span><button type="button" class="p" aria-label="Agregar una unidad">+</button></div></div>
         <button class="x" type="button">Quitar</button>`;
       const cambiar = n => { i.cant += n; if (i.cant < 1) carrito.splice(k, 1); guardar(); contador(); pintarCarrito(); };
@@ -215,16 +228,24 @@
     const kg = carrito.reduce((a, i) => a + i.peso * i.cant, 0);
     const z = T.envios[$("c-zona").value];
     const env = envio(z, kg);
+    const subEnc = carrito.filter(i => i.enc).reduce((a, i) => a + i.precio * i.cant, 0);
+    const subDisp = sub - subEnc;
+    const ant = carrito.filter(i => i.enc).reduce((a, i) => a + anticipo(i.precio) * i.cant, 0);
+    const ahora = subEnc ? subDisp + ant + (subDisp ? env : 0) : sub + env;
+    const luego = sub + env - ahora;
     $("c-tot").innerHTML = `<div><span>Productos</span><span>${fmt(sub)}</span></div>
       <div><span>Envío a ${esc(z.zona)}</span><span>${fmtEnv(env)}</span></div>
-      <div class="g"><span>Total</span><span>${fmt(sub + env)}</span></div>`;
-    return { sub, kg, env, z };
+      <div class="g"><span>Total</span><span>${fmt(sub + env)}</span></div>
+      ${subEnc ? `<div class="enc-box"><div><span>💳 Pagas ahora${subDisp ? "" : ` (anticipo ${pct}%)`}</span><span>${fmt(ahora)}</span></div>
+      <div><span>⏳ Pagas al recibir el encargo</span><span>${fmt(luego)}</span></div>
+      <small>Los productos por encargo llegan en máximo ${E.dias} días hábiles después de confirmar tu pago.</small></div>` : ""}`;
+    return { sub, kg, env, z, subEnc, ahora, luego };
   }
   $("c-zona").onchange = totales;
   $("c-form").addEventListener("submit", e => {
     e.preventDefault();
-    const { sub, env, z } = totales();
-    const lineas = carrito.map(i => `🔸 ${i.cant} × ${i.nombre}\n      ${fmt(i.precio * i.cant)}`).join("\n");
+    const { sub, env, z, subEnc, ahora, luego } = totales();
+    const lineas = carrito.map(i => `🔸 ${i.cant} × ${i.nombre}${i.enc ? " ⏳ *(por encargo)*" : ""}\n      ${fmt(i.precio * i.cant)}`).join("\n");
     ws([
       `⛰️✨ *¡Hola, ${T.nombre}!* ✨⛰️`,
       `Encontré oro en su tienda y quiero hacer este pedido 🛒`,
@@ -235,6 +256,7 @@
       `💰 Productos: ${fmt(sub)}`,
       `🚚 Envío a ${z.zona}: ${env ? fmt(env) : "¡Gratis! 🎉"}`,
       `🏆 *TOTAL: ${fmt(sub + env)}*`,
+      ...(subEnc ? [``, `⏳ *ENCARGO* (llega en máx. ${E.dias} días hábiles)`, `💳 Pago ahora: ${fmt(ahora)}`, `📦 Pago al recibir: ${fmt(luego)}`] : []),
       ``,
       `📋 *MIS DATOS*`,
       `👤 Nombre: ${$("c-nombre").value}`,

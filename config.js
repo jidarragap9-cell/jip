@@ -49,5 +49,9 @@ window.TIENDA = {
   ],
 
   // Formas de pago que se muestran al cliente.
+  // Productos POR ENCARGO: el cliente separa con un anticipo y llega en X días hábiles.
+  // En productos.csv escribe "Sí" en la columna "Encargo".
+  encargo: { anticipo: 0.40, dias: 20 },
+
   pagos: ["Llave Bre-B", "Nequi", "PSE", "Tarjeta", "Contraentrega"]
 };

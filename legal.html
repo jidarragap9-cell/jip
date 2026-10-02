@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#0a0907">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@800&family=Outfit:wght@400;600;800&display=swap">
-<link rel="stylesheet" href="styles.css?v=202610021412">
+<link rel="stylesheet" href="styles.css?v=202610021440">
 <style>
   .doc{background:var(--cream);color:var(--ink);padding-block:32px 56px}
   .doc .in{max-width:760px;display:grid;gap:8px}
@@ -31,7 +31,7 @@
   <h1>Información legal</h1>
   <p>Última actualización: <span id="fecha">octubre de 2026</span>.</p>
   <nav class="toc" aria-label="Secciones">
-    <a href="#vendedor">Vendedor</a><a href="#terminos">Términos</a><a href="#privacidad">Datos personales</a><a href="#cookies">Cookies</a><a href="#retracto">Retracto</a><a href="#reversion">Reversión del pago</a><a href="#garantias">Garantías</a><a href="#pqrs">PQRS</a>
+    <a href="#vendedor">Vendedor</a><a href="#terminos">Términos</a><a href="#encargo">Por encargo</a><a href="#privacidad">Datos personales</a><a href="#cookies">Cookies</a><a href="#retracto">Retracto</a><a href="#reversion">Reversión del pago</a><a href="#garantias">Garantías</a><a href="#pqrs">PQRS</a>
   </nav>
 
   <h2 id="vendedor">Quién vende</h2>
@@ -54,6 +54,14 @@
   <p>El valor del envío que muestra la página es un estimado por zona y peso. El valor definitivo se informa antes del pago. Los tiempos de entrega son aproximados y pueden variar por clima, estado de las vías o acceso a zonas rurales y mineras.</p>
   <h3>Pagos</h3>
   <p>Aceptamos los medios que aparecen en la tienda. Los pagos en línea se hacen a través de pasarelas autorizadas; la tienda no guarda datos de tarjetas.</p>
+  <h3 id="encargo">Productos por encargo</h3>
+  <p>Algunos productos se traen bajo pedido y están marcados como <strong>"Por encargo"</strong>. Para estos productos:</p>
+  <ul>
+    <li>Los separas pagando un <strong>anticipo del <span data-e="pct"></span>%</strong> del valor del producto. El saldo se paga cuando el producto llegue, antes de la entrega.</li>
+    <li>El producto llega en un plazo <strong>máximo de <span data-e="dias"></span> días hábiles</strong> contados desde que confirmamos tu pago. Te informaremos el avance por WhatsApp.</li>
+    <li>Si no podemos entregarlo en ese plazo, te avisaremos y podrás esperar o pedir la <strong>devolución total del anticipo</strong>, que haremos en máximo 30 días calendario.</li>
+    <li>Si decides cancelar antes de que el producto llegue, te devolvemos el anticipo. Una vez lo recibes, aplican normalmente el derecho de retracto y la garantía.</li>
+  </ul>
   <h3>Menores de edad</h3>
   <p>Las compras deben hacerlas personas mayores de 18 años o con autorización de su representante legal.</p>
 
@@ -109,9 +117,9 @@
 
 <footer class="gutter"><div class="in"><span class="goldtxt">SANTA ROSA DEL SUR · BOLÍVAR</span><a class="back" href="index.html">Volver a la tienda</a></div></footer>
 
-<script src="config.js?v=202610021412"></script>
+<script src="config.js?v=202610021440"></script>
 <script>
-  const T = window.TIENDA, E = { nombre: T.nombre, garantia: T.garantia, ...T.empresa };
+  const T = window.TIENDA, enc = T.encargo || { anticipo: 0.4, dias: 20 }, E = { nombre: T.nombre, garantia: T.garantia, pct: Math.round(enc.anticipo * 100), dias: enc.dias, ...T.empresa };
   document.querySelectorAll("[data-e]").forEach(el => { el.textContent = E[el.dataset.e] || ""; });
 </script>
 </body>
