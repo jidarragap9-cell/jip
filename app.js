@@ -87,7 +87,8 @@
     const cats = ["Todos", ...new Set(productos.map(p => p.cat))];
     $("icons").innerHTML = ""; $("nav").innerHTML = "";
     const all = document.createElement("button"); all.type = "button"; all.className = "all"; all.textContent = "☰ Categorías";
-    all.onclick = () => { filtro = "Todos"; pintar(); $("vitrina").scrollIntoView(); };
+    all.setAttribute("aria-haspopup", "true"); all.setAttribute("aria-expanded", "false");
+    all.onclick = e => { e.stopPropagation(); menuCats(all); };
     $("nav").append(all);
     cats.forEach(c => {
       const b = document.createElement("button"); b.type = "button"; b.setAttribute("aria-pressed", c === filtro);
@@ -99,6 +100,32 @@
       $("nav").append(n);
     });
   }
+  // Menú desplegable de categorías
+  function cerrarMenu() {
+    const m = $("menuCats"); if (m) m.remove();
+    document.querySelectorAll(".cats .all").forEach(b => b.setAttribute("aria-expanded", "false"));
+  }
+  function menuCats(btn) {
+    if ($("menuCats")) { cerrarMenu(); return; }
+    const m = document.createElement("div"); m.id = "menuCats"; m.setAttribute("role", "menu");
+    const cats = ["Todos", ...new Set(productos.map(p => p.cat))];
+    cats.forEach(c => {
+      const n = c === "Todos" ? productos.length : productos.filter(p => p.cat === c).length;
+      const b = document.createElement("button"); b.type = "button"; b.setAttribute("role", "menuitem");
+      if (c === filtro) b.className = "on";
+      b.innerHTML = `<svg viewBox="0 0 24 24">${icon(c)}</svg><span>${esc(c)}</span><small>${n}</small>`;
+      b.onclick = () => { filtro = c; busqueda = ""; $("q").value = ""; cerrarMenu(); pintar(); $("vitrina").scrollIntoView({ behavior: "smooth" }); };
+      m.append(b);
+    });
+    const r = btn.getBoundingClientRect();
+    m.style.top = (r.bottom + 6) + "px"; m.style.left = Math.max(8, r.left) + "px";
+    document.body.append(m); btn.setAttribute("aria-expanded", "true");
+  }
+  document.addEventListener("click", e => { if (!e.target.closest("#menuCats")) cerrarMenu(); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") cerrarMenu(); });
+  window.addEventListener("scroll", cerrarMenu, { passive: true });
+  window.addEventListener("resize", cerrarMenu);
+
   function pintar() {
     categorias();
     const q = norm(busqueda);

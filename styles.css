@@ -153,3 +153,13 @@ dialog::backdrop{background:rgba(0,0,0,.7)}
 .destino select{border-color:var(--gold);font-weight:500}
 .destino small{color:var(--muted);font-weight:400}
 .opc{color:var(--muted);font-weight:400}
+
+/* Menú desplegable de categorías */
+#menuCats{position:fixed;z-index:60;min-width:230px;max-width:calc(100vw - 16px);max-height:70vh;overflow:auto;background:#14110c;border:1px solid var(--gold-lo);border-radius:12px;padding:6px;box-shadow:0 12px 32px rgba(0,0,0,.55);display:grid;gap:2px;animation:menuIn .15s ease-out}
+#menuCats button{display:flex;align-items:center;gap:12px;width:100%;background:none;border:0;border-radius:8px;color:var(--cream);font:inherit;font-size:15px;padding:11px 12px;cursor:pointer;text-align:left}
+#menuCats button svg{width:20px;height:20px;fill:none;stroke:var(--gold);stroke-width:1.8;flex:none}
+#menuCats button span{flex:1}
+#menuCats button small{color:var(--gold);font-size:12px;background:rgba(227,178,60,.12);border-radius:999px;padding:2px 8px}
+#menuCats button:hover,#menuCats button.on{background:rgba(227,178,60,.14);color:var(--gold)}
+@keyframes menuIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.cats button.all:hover,.cats button.all[aria-expanded="true"]{color:var(--black);background:var(--gold-hi)}
