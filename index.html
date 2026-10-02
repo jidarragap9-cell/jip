@@ -88,7 +88,20 @@
   </div>
 </main>
 
-<footer class="gutter"><div class="in"><span class="goldtxt">SANTA ROSA DEL SUR · BOLÍVAR</span><span id="anio"></span></div></footer>
+<footer class="gutter">
+  <div class="in">
+    <span class="goldtxt">SANTA ROSA DEL SUR · BOLÍVAR</span>
+    <nav class="legal" aria-label="Información legal">
+      <a href="legal.html#terminos">Términos y condiciones</a>
+      <a href="legal.html#privacidad">Tratamiento de datos</a>
+      <a href="legal.html#retracto">Retracto y devoluciones</a>
+      <a href="legal.html#garantias">Garantías</a>
+      <a href="legal.html#pqrs">PQRS</a>
+      <a href="https://www.sic.gov.co" target="_blank" rel="noopener">Superintendencia de Industria y Comercio</a>
+    </nav>
+    <span id="anio"></span>
+  </div>
+</footer>
 
 <!-- Detalle de producto -->
 <dialog id="detalle" aria-labelledby="d-nombre">
@@ -118,8 +131,9 @@
     <label for="c-dir">Dirección, vereda o mina<input id="c-dir" autocomplete="street-address" required></label>
     <label for="c-pago">Forma de pago<select id="c-pago"></select></label>
     <div class="tot" id="c-tot"></div>
+    <label class="check" for="c-acepto"><input id="c-acepto" type="checkbox" required> <span>Acepto los <a href="legal.html#terminos" target="_blank">términos y condiciones</a> y autorizo el <a href="legal.html#privacidad" target="_blank">tratamiento de mis datos</a> para gestionar mi pedido.</span></label>
     <button class="btn" type="submit">Enviar pedido por WhatsApp</button>
-    <p class="nota">Te confirmamos disponibilidad y valor final del envío por WhatsApp.</p>
+    <p class="nota">Precios en pesos con IVA incluido. Te confirmamos disponibilidad y valor final del envío por WhatsApp. Tienes 5 días hábiles de retracto desde que recibes el producto.</p>
   </form>
 </dialog>
 

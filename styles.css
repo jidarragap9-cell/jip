@@ -92,6 +92,13 @@ output small{color:var(--dim)}
 footer{border-top:1px solid var(--gold-lo);padding-block:18px calc(18px + env(safe-area-inset-bottom,0px))}
 footer .in{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:12px;letter-spacing:.3em;color:var(--dim)}
 footer .in span:last-child{letter-spacing:.05em}
+footer .in{align-items:center}
+.legal{display:flex;flex-wrap:wrap;gap:6px 16px;letter-spacing:0;font-size:13px}
+.legal a{color:var(--dim);text-decoration:none}
+.legal a:hover{color:var(--gold);text-decoration:underline}
+.check{display:flex;gap:8px;align-items:flex-start;font-weight:400;font-size:13px}
+.check input{width:auto;margin-top:3px}
+.check a{color:var(--gold-lo)}
 
 dialog{border:1px solid var(--gold-lo);border-radius:16px;background:var(--cream);color:var(--ink);padding:24px;width:min(900px,calc(100% - 24px));max-height:calc(100% - 24px)}
 dialog::backdrop{background:rgba(0,0,0,.7)}

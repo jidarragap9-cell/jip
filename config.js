@@ -5,6 +5,19 @@ window.TIENDA = {
   nombre: "J&P del Sur",
   lema: "Tu mundo en un solo lugar",
 
+  // Datos legales del vendedor (obligatorios por ley). Completa cuando tengas RUT/NIT.
+  empresa: {
+    titular: "PENDIENTE: nombre completo o razón social",
+    nit: "PENDIENTE: NIT o cédula",
+    direccion: "Santa Rosa del Sur, Bolívar, Colombia",
+    correo: "PENDIENTE: correo de la tienda",
+    telefono: "317 798 6779"
+  },
+
+  // Garantía que ofreces si el producto no indica otra.
+  // Si no la anuncias, la ley asume 1 año para productos nuevos.
+  garantia: "1 año",
+
   // Tu número de WhatsApp con indicativo de Colombia (57), sin espacios ni "+".
   // Aquí llegan los pedidos.
   whatsapp: "573177986779",
