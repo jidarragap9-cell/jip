@@ -27,13 +27,16 @@ window.TIENDA = {
   // Mientras esté vacío, la tienda muestra los productos de "productos.csv".
   hojaCSV: "",
 
-  // Tarifas de envío. Cambia los valores por los de las transportadoras.
-  // base = valor fijo del envío; porKg = valor por cada kilo.
+  // Tarifas de envío ESTIMADAS. Se confirman al cliente por WhatsApp.
+  // base = valor fijo; porKg = valor por cada kilo; via = quién lleva el paquete.
+  // Para envío gratis pon base: 0 y porKg: 0.
   envios: [
-    { zona: "Santa Rosa del Sur · casco urbano",        base: 6000,  porKg: 1500, tiempo: "Mismo día" },
-    { zona: "Zona minera cercana (hasta 1 h)",          base: 15000, porKg: 2500, tiempo: "1 a 2 días" },
-    { zona: "Zona minera lejana (más de 1 h, trocha)",  base: 28000, porKg: 4000, tiempo: "2 a 4 días" },
-    { zona: "Simití / Morales",                         base: 18000, porKg: 3000, tiempo: "2 a 3 días" }
+    { zona: "Santa Rosa del Sur · casco urbano", base: 0, porKg: 0, tiempo: "Mismo día", via: "Entrega propia" },
+    { zona: "Minas y veredas cercanas (hasta 1 h)", base: 15000, porKg: 2000, tiempo: "1 a 2 días", via: "Transportador local" },
+    { zona: "Minas lejanas (más de 1 h o trocha)", base: 30000, porKg: 3500, tiempo: "2 a 4 días", via: "Transportador local" },
+    { zona: "Simití", base: 12000, porKg: 2000, tiempo: "1 a 2 días", via: "Coop. Transportadores del Sur de Bolívar / Inter Rapidísimo" },
+    { zona: "San Pablo", base: 18000, porKg: 2500, tiempo: "2 a 3 días", via: "Coop. Transportadores del Sur de Bolívar / Inter Rapidísimo" },
+    { zona: "Otra ciudad de Colombia", base: 18000, porKg: 4000, tiempo: "3 a 6 días", via: "Inter Rapidísimo / Servientrega / Coordinadora" }
   ],
 
   // Formas de pago que se muestran al cliente.

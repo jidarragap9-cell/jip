@@ -155,6 +155,7 @@
   }
   const contador = () => { $("nCart").textContent = carrito.reduce((a, i) => a + i.cant, 0); };
   const envio = (z, kg) => z.base + z.porKg * Math.max(0.5, kg);
+  const fmtEnv = v => (v ? fmt(v) : "Gratis");
   function abrirCarrito() { pintarCarrito(); $("carrito").showModal(); }
   function pintarCarrito() {
     const box = $("c-items");
@@ -177,7 +178,7 @@
     const z = T.envios[$("c-zona").value];
     const env = envio(z, kg);
     $("c-tot").innerHTML = `<div><span>Productos</span><span>${fmt(sub)}</span></div>
-      <div><span>Envío estimado (${kg.toLocaleString("es-CO")} kg)</span><span>${fmt(env)}</span></div>
+      <div><span>Envío estimado (${kg.toLocaleString("es-CO")} kg)</span><span>${fmtEnv(env)}</span></div>
       <div class="g"><span>Total</span><span>${fmt(sub + env)}</span></div>`;
     return { sub, kg, env, z };
   }
@@ -186,13 +187,13 @@
     e.preventDefault();
     const { sub, env, z } = totales();
     const lineas = carrito.map(i => `• ${i.cant} × ${i.nombre} = ${fmt(i.precio * i.cant)}`).join("\n");
-    ws(`Hola ${T.nombre}, quiero hacer este pedido:\n\n${lineas}\n\nProductos: ${fmt(sub)}\nEnvío a ${z.zona}: ${fmt(env)} (estimado)\nTotal: ${fmt(sub + env)}\n\nNombre: ${$("c-nombre").value}\nDirección: ${$("c-dir").value}\nPago: ${$("c-pago").value}`);
+    ws(`Hola ${T.nombre}, quiero hacer este pedido:\n\n${lineas}\n\nProductos: ${fmt(sub)}\nEnvío a ${z.zona}: ${fmtEnv(env)}${env ? " (estimado)" : ""}\nTotal: ${fmt(sub + env)}\n\nNombre: ${$("c-nombre").value}\nDirección: ${$("c-dir").value}\nPago: ${$("c-pago").value}`);
   });
   const ws = texto => window.open(`https://wa.me/${T.whatsapp}?text=${encodeURIComponent(texto)}`, "_blank", "noopener");
 
   // ---------- Envíos y demás ----------
   T.envios.forEach((z, i) => { $("e-zona").add(new Option(z.zona, i)); $("c-zona").add(new Option(z.zona, i)); });
-  const calc = () => { const z = T.envios[$("e-zona").value]; $("e-out").innerHTML = `<small>Valor estimado</small><b class="goldtxt">${fmt(envio(z, +$("e-kg").value || 0))}</b><small>${z.tiempo}</small>`; };
+  const calc = () => { const z = T.envios[$("e-zona").value]; $("e-out").innerHTML = `<small>Valor estimado</small><b class="goldtxt">${fmtEnv(envio(z, +$("e-kg").value || 0))}</b><small>${z.tiempo} · ${z.via || ""}</small>`; };
   $("e-zona").onchange = $("e-kg").oninput = calc; $("calc").onsubmit = e => e.preventDefault();
   T.pagos.forEach(p => { $("c-pago").add(new Option(p)); $("pagos").insertAdjacentHTML("beforeend", `<span class="chip">${esc(p)}</span>`); });
   $("anio").textContent = `© ${new Date().getFullYear()} ${T.nombre}`;
