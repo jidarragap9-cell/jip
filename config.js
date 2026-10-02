@@ -49,5 +49,5 @@ window.TIENDA = {
   ],
 
   // Formas de pago que se muestran al cliente.
-  pagos: ["Nequi", "PSE", "Tarjeta", "Contraentrega"]
+  pagos: ["Llave Bre-B", "Nequi", "PSE", "Tarjeta", "Contraentrega"]
 };
