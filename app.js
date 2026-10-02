@@ -212,12 +212,15 @@
       `📋 *MIS DATOS*`,
       `👤 Nombre: ${$("c-nombre").value}`,
       `📍 Entrega: ${$("c-dir").value}`,
+      ...($("c-dir2").value.trim() ? [`🏠 Referencia: ${$("c-dir2").value.trim()}`] : []),
       `💳 Pago: ${$("c-pago").value}`,
       ``,
       `Quedo atento a la confirmación. ¡Gracias! 🙌`
     ].join("\n"));
   });
-  const ws = texto => window.open(`https://api.whatsapp.com/send?phone=${T.whatsapp}&text=${encodeURIComponent(texto)}`, "_blank", "noopener");
+  // En computador WhatsApp Escritorio daña los emojis; WhatsApp Web los muestra bien.
+  const movil = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+  const ws = texto => window.open(`https://${movil ? "api" : "web"}.whatsapp.com/send?phone=${T.whatsapp}&text=${encodeURIComponent(texto)}`, "_blank", "noopener");
 
   // ---------- Envíos y demás ----------
   ["c-zona"].forEach(id => {

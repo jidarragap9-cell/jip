@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Outfit:wght@400;500;600;800&family=Allura&display=swap">
-<link rel="stylesheet" href="styles.css?v=202610020501">
+<link rel="stylesheet" href="styles.css?v=202610020507">
 </head>
 <body>
 
@@ -114,9 +114,10 @@
   <h2 id="c-tit">Tu pedido</h2>
   <div id="c-items"></div>
   <form id="c-form" class="c-form">
-    <label for="c-zona">Destino del envío<select id="c-zona"></select></label>
-    <label for="c-nombre">Tu nombre<input id="c-nombre" autocomplete="name" required></label>
-    <label for="c-dir">Dirección, vereda o mina<input id="c-dir" autocomplete="street-address" required></label>
+    <label for="c-zona" class="destino">🚚 Destino del envío<select id="c-zona"></select><small>El valor del envío se suma al total.</small></label>
+    <label for="c-nombre">Nombre completo<input id="c-nombre" autocomplete="name" placeholder="Nombres y apellidos" required></label>
+    <label for="c-dir">Dirección, vereda o mina<input id="c-dir" autocomplete="address-line1" placeholder="Ej. Calle 5 # 3-20 o Mina La Esperanza" required></label>
+    <label for="c-dir2">Dirección complementaria <span class="opc">(opcional)</span><input id="c-dir2" autocomplete="address-line2" placeholder="Barrio, casa, punto de referencia"></label>
     <label for="c-pago">Forma de pago<select id="c-pago"></select></label>
     <div class="tot" id="c-tot"></div>
     <label class="check" for="c-acepto"><input id="c-acepto" type="checkbox" required> <span>Acepto los <a href="legal.html#terminos" target="_blank">términos y condiciones</a> y autorizo el <a href="legal.html#privacidad" target="_blank">tratamiento de mis datos</a> para gestionar mi pedido.</span></label>
@@ -125,7 +126,7 @@
   </form>
 </dialog>
 
-<script src="config.js?v=202610020501"></script>
-<script src="app.js?v=202610020501"></script>
+<script src="config.js?v=202610020507"></script>
+<script src="app.js?v=202610020507"></script>
 </body>
 </html>
