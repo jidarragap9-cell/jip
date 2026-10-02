@@ -119,7 +119,7 @@
         <div class="price"><b>${fmt(p.precio)}</b>${off ? `<s>${fmt(p.antes)}</s>` : ""}</div></div></button>
         <button class="buy" type="button">Agregar al carrito</button>`;
       el.querySelector(".open").onclick = () => abrir(p);
-      el.querySelector(".buy").onclick = e => { agregar(p, 1); e.target.textContent = "Agregado ✓"; };
+      el.querySelector(".buy").onclick = e => { agregar(p, 1); e.target.textContent = "Agregado ✓"; aviso(`✨ ¡Buena elección! ${p.nombre} ya está en tu carrito`); };
       grid.append(el);
     });
   }
@@ -145,13 +145,20 @@
   $("d-menos").onclick = () => { cant = Math.max(1, cant - 1); $("d-cant").textContent = cant; };
   $("d-mas").onclick = () => { cant++; $("d-cant").textContent = cant; };
   $("d-agregar").onclick = () => { agregar(actual, cant); $("detalle").close(); abrirCarrito(); };
-  $("d-ws").onclick = () => ws(`Hola, quiero información sobre: ${actual.nombre} (${fmt(actual.precio)})`);
+  $("d-ws").onclick = () => ws(`⛰️✨ *¡Hola, ${T.nombre}!*\n\nMe interesa este producto 👇\n🔸 *${actual.nombre}*\n💰 ${fmt(actual.precio)}\n\n¿Me dan más información? 🙌`);
 
   // ---------- Carrito ----------
   function agregar(p, n) {
     const it = carrito.find(i => i.nombre === p.nombre);
     if (it) it.cant += n; else carrito.push({ nombre: p.nombre, precio: p.precio, peso: p.peso, foto: p.fotos[0] || "", cant: n });
     guardar(); contador();
+  }
+  let avisoT;
+  function aviso(txt) {
+    let t = $("aviso");
+    if (!t) { t = document.createElement("div"); t.id = "aviso"; t.setAttribute("role", "status"); document.body.append(t); }
+    t.textContent = txt; t.classList.add("on");
+    clearTimeout(avisoT); avisoT = setTimeout(() => t.classList.remove("on"), 2600);
   }
   const contador = () => { $("nCart").textContent = carrito.reduce((a, i) => a + i.cant, 0); };
   const envio = z => z.valor || 0;
@@ -190,8 +197,25 @@
   $("c-form").addEventListener("submit", e => {
     e.preventDefault();
     const { sub, env, z } = totales();
-    const lineas = carrito.map(i => `• ${i.cant} × ${i.nombre} = ${fmt(i.precio * i.cant)}`).join("\n");
-    ws(`Hola ${T.nombre}, quiero hacer este pedido:\n\n${lineas}\n\nProductos: ${fmt(sub)}\nEnvío a ${z.zona}: ${fmtEnv(env)}${env ? " (estimado)" : ""}\nTotal: ${fmt(sub + env)}\n\nNombre: ${$("c-nombre").value}\nDirección: ${$("c-dir").value}\nPago: ${$("c-pago").value}`);
+    const lineas = carrito.map(i => `🔸 ${i.cant} × ${i.nombre}\n      ${fmt(i.precio * i.cant)}`).join("\n");
+    ws([
+      `⛰️✨ *¡Hola, ${T.nombre}!* ✨⛰️`,
+      `Encontré oro en su tienda y quiero hacer este pedido 🛒`,
+      ``,
+      `📦 *MI PEDIDO*`,
+      lineas,
+      ``,
+      `💰 Productos: ${fmt(sub)}`,
+      `🚚 Envío a ${z.zona}: ${env ? fmt(env) : "¡Gratis! 🎉"}`,
+      `🏆 *TOTAL: ${fmt(sub + env)}*`,
+      ``,
+      `📋 *MIS DATOS*`,
+      `👤 Nombre: ${$("c-nombre").value}`,
+      `📍 Entrega: ${$("c-dir").value}`,
+      `💳 Pago: ${$("c-pago").value}`,
+      ``,
+      `Quedo atento a la confirmación. ¡Gracias! 🙌`
+    ].join("\n"));
   });
   const ws = texto => window.open(`https://wa.me/${T.whatsapp}?text=${encodeURIComponent(texto)}`, "_blank", "noopener");
 
