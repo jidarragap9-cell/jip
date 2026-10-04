@@ -32,6 +32,14 @@ window.TIENDA = {
   // Formas de pago que se muestran al cliente.
   // Productos POR ENCARGO: el cliente separa con un anticipo y llega en X días hábiles.
   // En productos.csv escribe "Sí" en la columna "Encargo".
+  // Subcategorías del menú (se pueden agregar más). En la hoja, columna "Subcategoría".
+  subcategorias: {
+    "Tecnología": ["Cargadores", "Cables", "Audífonos", "Relojes inteligentes", "Accesorios para celular"],
+    "Belleza": ["Maquillaje", "Cuidado del cabello", "Cuidado de la piel", "Perfumes", "Uñas"],
+    "Moda": ["Gorras", "Bolsos y billeteras", "Relojes", "Gafas", "Ropa"],
+    "Calzado": ["Tenis hombre", "Tenis mujer", "Sandalias", "Zapatos"],
+    "Hogar": ["Cocina", "Decoración", "Organización", "Limpieza"]
+  },
   encargo: { anticipo: 50000, dias: 20 }, // anticipo fijo en pesos por unidad (si es menor que 1, se toma como %)
 
   // Llave Bre-B y QR que se muestran en la portada. qr: ruta de la imagen, ej. "img/qr-breb.png".

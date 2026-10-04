@@ -234,3 +234,9 @@ footer .ig { display: inline-flex; align-items: center; gap: 6px; }
 .destino small{color:var(--muted)}
 .destino .op input{appearance:none;-webkit-appearance:none;width:18px;height:18px;border:2px solid #b8861b;border-radius:50%;background:#fff;flex:none;margin:0}
 .destino .op input:checked{background:radial-gradient(circle,#b8861b 45%,#fff 50%)}
+#menuCats .chev{width:8px;height:8px;border-right:2px solid var(--gold);border-bottom:2px solid var(--gold);transform:rotate(45deg);transition:transform .2s;margin-right:4px}
+#menuCats button[aria-expanded="true"] .chev{transform:rotate(-135deg)}
+#menuCats .subs{display:grid;gap:1px;margin:0 0 4px 44px;border-left:1px solid var(--gold-lo)}
+#menuCats .subs[hidden]{display:none}
+#menuCats .subs button{font-size:14px;padding:9px 12px;color:#d9cfbd}
+#menuCats .subs button:first-child{color:var(--gold);font-weight:600}

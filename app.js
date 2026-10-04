@@ -59,7 +59,7 @@
     const col = (...keys) => head.findIndex(h => keys.some(k => h.includes(k)));
     const c = {
       nombre: col("nombre", "producto"), precio: head.findIndex(h => h.startsWith("precio") && !h.includes("antes")),
-      antes: col("antes", "anterior"), cat: col("categor"), specs: col("caracter", "especific", "descrip"),
+      antes: col("antes", "anterior"), cat: head.findIndex(h => h.startsWith("categor")), sub: col("subcat"), specs: col("caracter", "especific", "descrip"),
       fotos: col("foto", "imagen"), video: col("video"), peso: col("peso"), dest: col("destac", "ganador"), ocultar: col("ocultar", "agotado"), enc: col("encargo"), gar: col("garant")
     };
     const g = (r, k) => (c[k] >= 0 ? (r[c[k]] || "").trim() : "");
@@ -69,6 +69,7 @@
       precio: num(g(r, "precio")),
       antes: num(g(r, "antes")),
       cat: g(r, "cat") || "Otros",
+      sub: g(r, "sub"),
       specs: g(r, "specs").split(/\n|;|•/).map(s => s.trim()).filter(Boolean),
       fotos: g(r, "fotos").split(/[\s,]+/).filter(u => /^(https?:|img\/)/.test(u)).map(toImg),
       video: toVideo(g(r, "video")),
@@ -81,13 +82,15 @@
   }
 
   // ---------- Estado ----------
-  let productos = [], filtro = "Todos", busqueda = "";
+  let productos = [], filtro = "Todos", subf = "", busqueda = "";
   const ENC = "Por encargo", E = T.encargo || { anticipo: 0.4, dias: 20 };
   const pct = Math.round(E.anticipo * 100);
   const anticipo = v => E.anticipo < 1 ? Math.ceil(v * E.anticipo / 1000) * 1000 : Math.min(E.anticipo, v);
   const antTxt = E.anticipo < 1 ? `el ${pct}% de su valor` : fmt(E.anticipo);
   const listaCats = () => { const c = ["Todos", ...new Set(productos.map(p => p.cat))]; c.push(ENC); return c; };
-  const enCat = (p, c) => c === "Todos" || (c === ENC ? p.enc : p.cat === c);
+  const enCat = (p, c) => c === "Todos" || (c === ENC ? p.enc : p.cat === c && (!subf || norm(p.sub) === norm(subf)));
+  const subsDe = c => { const l = [...((T.subcategorias || {})[c] || [])]; productos.forEach(p => { if (p.cat === c && p.sub && !l.some(x => norm(x) === norm(p.sub))) l.push(p.sub); }); return l; };
+  const elegir = (c, s = "") => { filtro = c; subf = s; busqueda = ""; $("q").value = ""; cerrarMenu(); pintar(); $("vitrina").scrollIntoView({ behavior: "smooth" }); };
   let carrito = [];
   try { carrito = JSON.parse(localStorage.getItem("jp-carrito") || "[]"); } catch { }
   const guardar = () => { try { localStorage.setItem("jp-carrito", JSON.stringify(carrito)); } catch { } };
@@ -103,11 +106,8 @@
     cats.forEach(c => {
       const b = document.createElement("button"); b.type = "button"; b.setAttribute("aria-pressed", c === filtro);
       b.innerHTML = `<svg viewBox="0 0 24 24">${icon(c)}</svg>${esc(c)}`;
-      b.onclick = () => { filtro = c; pintar(); };
+      b.onclick = () => { filtro = c; subf = ""; pintar(); };
       $("icons").append(b);
-      const n = document.createElement("button"); n.type = "button"; n.textContent = c; n.setAttribute("aria-pressed", c === filtro);
-      n.onclick = () => { filtro = c; pintar(); $("vitrina").scrollIntoView(); };
-      $("nav").append(n);
     });
   }
   // Menú desplegable de categorías
@@ -120,12 +120,21 @@
     const m = document.createElement("div"); m.id = "menuCats"; m.setAttribute("role", "menu");
     const cats = listaCats();
     cats.forEach(c => {
-      const n = productos.filter(p => enCat(p, c)).length;
+      const subs = c === "Todos" || c === ENC ? [] : subsDe(c);
       const b = document.createElement("button"); b.type = "button"; b.setAttribute("role", "menuitem");
       if (c === filtro) b.className = "on";
-      b.innerHTML = `<svg viewBox="0 0 24 24">${icon(c)}</svg><span>${esc(c)}</span><small>${n}</small>`;
-      b.onclick = () => { filtro = c; busqueda = ""; $("q").value = ""; cerrarMenu(); pintar(); $("vitrina").scrollIntoView({ behavior: "smooth" }); };
+      b.innerHTML = `<svg viewBox="0 0 24 24">${icon(c)}</svg><span>${esc(c)}</span>${subs.length ? '<i class="chev" aria-hidden="true"></i>' : ""}`;
       m.append(b);
+      if (!subs.length) { b.onclick = () => elegir(c); return; }
+      const box = document.createElement("div"); box.className = "subs"; box.hidden = c !== filtro;
+      b.setAttribute("aria-expanded", !box.hidden);
+      [["Ver todo en " + c, ""], ...subs.map(s => [s, s])].forEach(([t, s]) => {
+        const x = document.createElement("button"); x.type = "button"; x.setAttribute("role", "menuitem"); x.textContent = t;
+        if (c === filtro && s === subf) x.className = "on";
+        x.onclick = () => elegir(c, s); box.append(x);
+      });
+      b.onclick = () => { m.querySelectorAll(".subs").forEach(o => { if (o !== box) { o.hidden = true; o.previousElementSibling.setAttribute("aria-expanded", "false"); } }); box.hidden = !box.hidden; b.setAttribute("aria-expanded", !box.hidden); };
+      m.append(box);
     });
     const r = btn.getBoundingClientRect();
     m.style.top = (r.bottom + 6) + "px"; m.style.left = Math.max(8, r.left) + "px";
@@ -141,8 +150,7 @@
     const q = norm(busqueda);
     let lista = productos.filter(p => enCat(p, filtro) && (!q || norm(p.nombre + " " + p.cat + " " + p.specs.join(" ")).includes(q)));
     if (filtro === "Todos" && !q) lista = [...lista.filter(p => p.dest), ...lista.filter(p => !p.dest)];
-    $("titulo").textContent = q ? `Resultados para “${busqueda}”` : filtro === "Todos" ? "Productos destacados" : filtro;
-    $("count").textContent = `${lista.length} producto${lista.length === 1 ? "" : "s"}`;
+    $("titulo").textContent = q ? `Resultados para “${busqueda}”` : filtro === "Todos" ? "Productos destacados" : subf ? `${filtro} › ${subf}` : filtro;
     const grid = $("grid"); grid.innerHTML = "";
     $("enc-intro").hidden = filtro !== ENC || !!q;
     if (filtro === ENC && !q) $("enc-intro").innerHTML = `<h3>⏳ Aparta productos innovadores</h3>
@@ -152,7 +160,7 @@
       <li>Lo recibes en máximo <b>${E.dias} días hábiles</b> después de confirmar tu pago.</li>
       <li>Pagas el resto cuando llegue. Si no llega a tiempo, te devolvemos tu anticipo.</li></ol>
       <a href="legal.html#encargo">Ver condiciones</a>`;
-    if (!lista.length) { grid.innerHTML = filtro === ENC && !q ? '<p class="empty">Muy pronto publicaremos aquí productos innovadores para apartar. ¿Buscas algo en especial? Escríbenos por WhatsApp y te lo conseguimos.</p>' : '<p class="empty">No encontramos productos. Prueba con otra búsqueda.</p>'; return; }
+    if (!lista.length) { grid.innerHTML = filtro === ENC && !q ? '<p class="empty">Muy pronto publicaremos aquí productos innovadores para apartar. ¿Buscas algo en especial? Escríbenos por WhatsApp y te lo conseguimos.</p>' : subf && !q ? `<p class="empty">Muy pronto tendremos productos de <b>${esc(subf)}</b>. ¿Buscas algo en especial? Escríbenos por WhatsApp y te lo conseguimos.</p>` : '<p class="empty">No encontramos productos. Prueba con otra búsqueda.</p>'; return; }
     lista.forEach(p => {
       const off = p.antes > p.precio ? Math.round(100 - p.precio * 100 / p.antes) : 0;
       const el = document.createElement("article"); el.className = "card";
