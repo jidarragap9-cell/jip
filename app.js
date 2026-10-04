@@ -77,7 +77,7 @@
       ocultar: si(g(r, "ocultar")),
       enc: si(g(r, "enc")),
       gar: g(r, "gar")
-    })).filter(p => p.nombre && p.precio && !p.ocultar).reverse(); // lo más nuevo primero
+    })).filter(p => p.nombre && (p.precio || p.enc) && !p.ocultar).reverse(); // lo más nuevo primero
   }
 
   // ---------- Estado ----------
@@ -147,7 +147,8 @@
     $("enc-intro").hidden = filtro !== ENC || !!q;
     if (filtro === ENC && !q) $("enc-intro").innerHTML = `<h3>⏳ Aparta productos innovadores</h3>
       <p>Productos novedosos que traemos <b>bajo pedido</b>. Así funciona:</p>
-      <ol><li>Eliges el producto y lo apartas pagando solo <b>${antTxt}</b>.</li>
+      <ol><li>Eliges el producto y nos escribes por WhatsApp para darte el <b>precio</b>.</li>
+      <li>Lo apartas pagando solo <b>${antTxt}</b>.</li>
       <li>Lo recibes en máximo <b>${E.dias} días hábiles</b> después de confirmar tu pago.</li>
       <li>Pagas el resto cuando llegue. Si no llega a tiempo, te devolvemos tu anticipo.</li></ol>
       <a href="legal.html#encargo">Ver condiciones</a>`;
@@ -160,11 +161,10 @@
         ${p.dest ? '<span class="badge">Destacado</span>' : ""}${off ? `<span class="badge off">-${off}%</span>` : ""}${p.enc ? '<span class="badge enc">⏳ Por encargo</span>' : '<span class="badge ya">✅ Entrega inmediata</span>'}</div>
         <div class="body"><h3>${esc(p.nombre)}</h3>
         <ul class="specs">${p.specs.slice(0, 2).map(s => `<li>${esc(s)}</li>`).join("")}</ul>
-        <div class="price"><b>${fmt(p.precio)}</b>${off ? `<s>${fmt(p.antes)}</s>` : ""}</div>
-        ${p.enc ? `<p class="sep">Sepáralo con <b>${fmt(anticipo(p.precio))}</b> · llega en ${E.dias} días hábiles</p>` : ""}</div></button>
-        <button class="buy" type="button">${p.enc ? "Separar por encargo" : "Agregar al carrito"}</button>`;
+        ${p.enc ? `<div class="price cot"><b>Precio a consultar</b></div><p class="sep">Apártalo con <b>${antTxt}</b> · llega en ${E.dias} días hábiles</p>` : `<div class="price"><b>${fmt(p.precio)}</b>${off ? `<s>${fmt(p.antes)}</s>` : ""}</div>`}</div></button>
+        <button class="buy" type="button">${p.enc ? "💬 Cotizar por WhatsApp" : "Agregar al carrito"}</button>`;
       el.querySelector(".open").onclick = () => abrir(p);
-      el.querySelector(".buy").onclick = e => { agregar(p, 1); e.target.textContent = "Agregado ✓"; aviso(`✨ ¡Buena elección! ${p.nombre} ya está en tu carrito`); };
+      el.querySelector(".buy").onclick = e => { if (p.enc) return cotizar(p); agregar(p, 1); e.target.textContent = "Agregado ✓"; aviso(`✨ ¡Buena elección! ${p.nombre} ya está en tu carrito`); };
       grid.append(el);
     });
   }
@@ -174,14 +174,15 @@
   function abrir(p) {
     actual = p; cant = 1; $("d-cant").textContent = 1;
     $("d-cat").textContent = p.cat; $("d-nombre").textContent = p.nombre;
-    $("d-precio").innerHTML = `<b>${fmt(p.precio)}</b>${p.antes > p.precio ? `<s>${fmt(p.antes)}</s>` : ""}`;
+    $("d-precio").innerHTML = p.enc ? "<b>Precio a consultar</b>" : `<b>${fmt(p.precio)}</b>${p.antes > p.precio ? `<s>${fmt(p.antes)}</s>` : ""}`;
     $("d-specs").innerHTML = p.specs.map(s => `<li>${esc(s)}</li>`).join("");
     $("d-enc").hidden = !p.enc;
     if (p.enc) $("d-enc").innerHTML = `<b>⏳ Producto por encargo</b>
-      <span>Sepáralo con <b>${fmt(anticipo(p.precio))}</b>. El resto (${fmt(p.precio - anticipo(p.precio))}) lo pagas cuando llegue.</span>
+      <span>Escríbenos por WhatsApp y te damos el precio. Lo apartas con <b>${antTxt}</b> y el resto lo pagas cuando llegue.</span>
       <span>Llega en máximo ${E.dias} días hábiles después de confirmar tu pago.</span>`;
     $("d-gar").innerHTML = `🛡️ <b>Garantía:</b> ${esc(p.gar || "por defectos de fábrica, consúltala por WhatsApp antes de comprar")} · <a href="legal.html#garantias" target="_blank">condiciones</a>`;
-    $("d-agregar").textContent = p.enc ? "Separar por encargo" : "Agregar al carrito";
+    $("d-agregar").style.display = p.enc ? "none" : ""; $("d-agregar").textContent = "Agregar al carrito"; $("d-menos").parentElement.style.display = p.enc ? "none" : "";
+    $("d-ws").textContent = p.enc ? "💬 Cotizar por WhatsApp" : "Preguntar por WhatsApp";
     const medios = [...p.fotos.map(src => ({ t: "img", src })), ...(p.video ? [{ t: "vid", src: p.video }] : [])];
     const ver = m => { $("d-main").innerHTML = !m ? '<span class="ph">J&amp;P</span>' : m.t === "img" ? `<img src="${esc(m.src)}" alt="${esc(p.nombre)}">` : `<iframe src="${esc(m.src)}" allow="autoplay; encrypted-media" allowfullscreen title="Video"></iframe>`; };
     ver(medios[0]);
@@ -196,7 +197,8 @@
   $("d-menos").onclick = () => { cant = Math.max(1, cant - 1); $("d-cant").textContent = cant; };
   $("d-mas").onclick = () => { cant++; $("d-cant").textContent = cant; };
   $("d-agregar").onclick = () => { agregar(actual, cant); $("detalle").close(); abrirCarrito(); };
-  $("d-ws").onclick = () => ws(`⛰️✨ *¡Hola, ${T.nombre}!*\n\nMe interesa este producto 👇\n🔸 *${actual.nombre}*\n💰 ${fmt(actual.precio)}\n\n¿Me dan más información? 🙌`);
+  const cotizar = p => ws(`⛰️✨ *¡Hola, ${T.nombre}!*\n\nQuiero cotizar este producto *por encargo* 👇\n🔸 *${p.nombre}*\n\n¿Cuál es el precio para apartarlo? 🙌`);
+  $("d-ws").onclick = () => actual.enc ? cotizar(actual) : ws(`⛰️✨ *¡Hola, ${T.nombre}!*\n\nMe interesa este producto 👇\n🔸 *${actual.nombre}*\n💰 ${fmt(actual.precio)}\n\n¿Me dan más información? 🙌`);
 
   // ---------- Carrito ----------
   function agregar(p, n) {
