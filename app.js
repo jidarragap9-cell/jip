@@ -15,6 +15,7 @@
     calzado: '<path d="M3 16c0-3 1-7 3-9l4 3c2 1 5 2 8 3 2 .5 3 2 3 3v2H3z"/>',
     perfumeria: '<rect x="6" y="9" width="12" height="12" rx="2"/><path d="M10 9V6h4v3M12 3v3"/>',
     electrodomesticos: '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M5 9h14M9 6h.01"/>',
+    belleza: '<path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M18 15l.8 2.2L21 18l-2.2.8L18 21l-.8-2.2L15 18l2.2-.8z"/>',
     "por encargo": '<circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/>',
     otros: '<circle cx="12" cy="12" r="9"/><path d="M8 12h.01M12 12h.01M16 12h.01"/>'
   };
