@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Outfit:wght@400;500;600;800&family=Allura&display=swap">
-<link rel="stylesheet" href="styles.css?v=202610040237">
+<link rel="stylesheet" href="styles.css?v=202610040327">
 </head>
 <body>
 
@@ -51,20 +51,44 @@
     <path d="M0 300 L0 250 L180 200 L300 240 L450 170 L600 240 L760 190 L900 250 L1050 190 L1200 230 L1200 300 Z" fill="#0f0c08"/>
     <path d="M380 90 L470 160 M1060 80 L1200 160 M820 110 L940 170" stroke="#e3b23c" stroke-opacity=".35" stroke-width="2" fill="none"/>
   </svg>
-  <div class="in">
-    <div>
-      <h1>Todo lo que necesitas, <span class="goldtxt">en un solo lugar</span></h1>
-      <p>Tecnología, herramientas, hogar y moda al mejor precio, con envío a veredas y zonas mineras del Sur de Bolívar.</p>
-      <div class="trust">
-        <span><svg viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg>Productos originales</span>
-        <span><svg viewBox="0 0 24 24"><path d="M2 7h11v9H2zM13 10h4l4 3v3h-8"/><circle cx="6" cy="17.5" r="1.5"/><circle cx="17" cy="17.5" r="1.5"/></svg>Envíos a zonas mineras</span>
-        <span><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/></svg>Compra segura</span>
+  <div class="in slides" id="slides" aria-roledescription="carrusel">
+    <div class="slide on" aria-roledescription="panel" aria-label="1 de 3">
+      <div>
+        <h1 class="a1">Todo lo que necesitas, <span class="goldtxt">en un solo lugar</span></h1>
+        <p class="a2">Tecnología, herramientas, hogar y moda al mejor precio, con envío a veredas y zonas mineras del Sur de Bolívar.</p>
+        <div class="trust a3">
+          <span><svg viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg>Productos originales</span>
+          <span><svg viewBox="0 0 24 24"><path d="M2 7h11v9H2zM13 10h4l4 3v3h-8"/><circle cx="6" cy="17.5" r="1.5"/><circle cx="17" cy="17.5" r="1.5"/></svg>Envíos a zonas mineras</span>
+          <span><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/></svg>Compra segura</span>
+        </div>
+        <a class="cta a4" href="#vitrina">Ver productos →</a>
       </div>
-      <div class="pays" id="pagos"></div>
-      <a class="cta" href="#vitrina">Ver productos →</a>
+      <div class="slogan goldtxt a2">Justos precios,<br>grandes oportunidades</div>
     </div>
-    <div class="slogan goldtxt">Justos precios,<br>grandes oportunidades</div>
+    <div class="slide" aria-roledescription="panel" aria-label="2 de 3" aria-hidden="true">
+      <div>
+        <h2 class="big a1">Paga fácil con tu <span class="goldtxt">Llave Bre-B</span></h2>
+        <p class="a2">Transfiere desde cualquier banco o billetera al instante y sin costo. Escanea el QR o usa nuestra llave.</p>
+        <div class="llave a3"><svg viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="m11 12 9-9M17 6l3 3M15 8l2 2"/></svg><div><small>Nuestra llave</small><b id="llave">Muy pronto</b></div></div>
+        <div class="pays a4" id="pagos"></div>
+      </div>
+      <div class="qr a2" id="qr"><span>QR<br>muy pronto</span></div>
+    </div>
+    <div class="slide" aria-roledescription="panel" aria-label="3 de 3" aria-hidden="true">
+      <div>
+        <h2 class="big a1">Envíos <span class="goldtxt">a toda Colombia</span></h2>
+        <p class="a2">Llegamos también a veredas, corregimientos y minas del Sur de Bolívar.</p>
+        <ul class="envlist a3">
+          <li><b>Santa Rosa del Sur</b> · envío gratis el mismo día</li>
+          <li><b>Veredas y minas</b> · con transportador local</li>
+          <li><b>Resto del país</b> · eliges tu departamento y municipio en el carrito</li>
+        </ul>
+        <a class="cta a4" href="#vitrina">Ver productos →</a>
+      </div>
+      <div class="truck a2"><svg viewBox="0 0 120 92" class="mk"><use href="#mark"/></svg><svg viewBox="0 0 24 24" class="tk"><path d="M2 7h11v9H2zM13 10h4l4 3v3h-8"/><circle cx="6" cy="17.5" r="1.5"/><circle cx="17" cy="17.5" r="1.5"/></svg></div>
+    </div>
   </div>
+  <div class="dots" id="dots" role="tablist" aria-label="Paneles"></div>
 </section>
 
 <main class="light gutter">
@@ -121,7 +145,14 @@
   <h2 id="c-tit">Tu pedido</h2>
   <div id="c-items"></div>
   <form id="c-form" class="c-form">
-    <label for="c-zona" class="destino">🚚 Destino del envío<select id="c-zona"></select><small>El valor del envío se suma al total.</small></label>
+    <fieldset class="destino" id="c-dest"><legend>🚚 ¿A dónde enviamos?</legend>
+      <label class="op"><input type="radio" name="c-tipo" value="sr" checked> <span><b>Santa Rosa del Sur</b> · casco urbano <em>Gratis</em></span></label>
+      <label class="op"><input type="radio" name="c-tipo" value="ver"> <span><b>Vereda, corregimiento o mina</b> de Santa Rosa</span></label>
+      <select id="c-ver" hidden></select>
+      <label class="op"><input type="radio" name="c-tipo" value="nac"> <span><b>Envío nacional</b> · otro municipio de Colombia</span></label>
+      <div class="nac" id="c-nac" hidden><select id="c-dep" aria-label="Departamento"></select><select id="c-mun" aria-label="Municipio"></select></div>
+      <small id="c-envinfo">El valor del envío se suma al total.</small>
+    </fieldset>
     <label for="c-nombre">Nombre completo<input id="c-nombre" autocomplete="name" placeholder="Nombres y apellidos" required></label>
     <label for="c-dir">Dirección, vereda o mina<input id="c-dir" autocomplete="address-line1" placeholder="Ej. Calle 5 # 3-20 o Mina La Esperanza" required></label>
     <label for="c-dir2">Dirección complementaria <span class="opc">(opcional)</span><input id="c-dir2" autocomplete="address-line2" placeholder="Barrio, casa, punto de referencia"></label>
@@ -133,7 +164,8 @@
   </form>
 </dialog>
 
-<script src="config.js?v=202610040237"></script>
-<script src="app.js?v=202610040237"></script>
+<script src="config.js?v=202610040327"></script>
+<script src="envios.js?v=202610040327"></script>
+<script src="app.js?v=202610040327"></script>
 </body>
 </html>

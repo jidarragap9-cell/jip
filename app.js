@@ -239,7 +239,7 @@
   function totales() {
     const sub = carrito.reduce((a, i) => a + i.precio * i.cant, 0);
     const kg = carrito.reduce((a, i) => a + i.peso * i.cant, 0);
-    const z = T.envios[$("c-zona").value];
+    const z = destino();
     const env = envio(z, kg);
     const subEnc = carrito.filter(i => i.enc).reduce((a, i) => a + i.precio * i.cant, 0);
     const subDisp = sub - subEnc;
@@ -254,9 +254,9 @@
       <small>Los productos por encargo llegan en máximo ${E.dias} días hábiles después de confirmar tu pago.</small></div>` : ""}`;
     return { sub, kg, env, z, subEnc, ahora, luego };
   }
-  $("c-zona").onchange = totales;
   $("c-form").addEventListener("submit", e => {
     e.preventDefault();
+    if (destino().pendiente) { aviso("📍 Elige el departamento y el municipio del envío"); $("c-dep").focus(); return; }
     const { sub, env, z, subEnc, ahora, luego } = totales();
     const lineas = carrito.map(i => `🔸 ${i.cant} × ${i.nombre}${i.enc ? " ⏳ *(por encargo)*" : ""}\n      ${fmt(i.precio * i.cant)}`).join("\n");
     ws([
@@ -285,14 +285,62 @@
   const ws = texto => window.open(`https://${movil ? "api" : "web"}.whatsapp.com/send?phone=${T.whatsapp}&text=${encodeURIComponent(texto)}`, "_blank", "noopener");
 
   // ---------- Envíos y demás ----------
-  ["c-zona"].forEach(id => {
-    const grupos = {};
-    T.envios.forEach((z, i) => {
-      const g = z.grupo || "Destinos";
-      if (!grupos[g]) { grupos[g] = document.createElement("optgroup"); grupos[g].label = g; $(id).append(grupos[g]); }
-      grupos[g].append(new Option(z.valor ? `${z.zona} · ${fmt(z.valor)}` : `${z.zona} · Gratis`, i));
-    });
-  });
+  const EV = window.ENVIOS, tipo = () => (document.querySelector('[name="c-tipo"]:checked') || {}).value;
+  EV.local.slice(1).forEach(z => $("c-ver").add(new Option(`${z.zona} · ${fmt(z.valor)}`, z.id)));
+  $("c-dep").add(new Option("Elige el departamento", ""));
+  EV.deptos.forEach((d, i) => $("c-dep").add(new Option(d.d, i)));
+  const llenarMun = () => {
+    const d = EV.deptos[$("c-dep").value];
+    $("c-mun").innerHTML = ""; $("c-mun").add(new Option(d ? "Elige el municipio" : "Primero elige el departamento", ""));
+    if (d) d.m.forEach(m => $("c-mun").add(new Option(m, m)));
+  };
+  llenarMun();
+  function destino() {
+    const t = tipo();
+    if (t === "ver") return EV.local.find(z => z.id === $("c-ver").value) || EV.local[1];
+    if (t === "nac") {
+      const d = EV.deptos[$("c-dep").value], m = $("c-mun").value;
+      if (!d || !m) return { zona: "(elige departamento y municipio)", valor: 0, pendiente: true };
+      const esp = EV.especiales[`${d.d}|${m}`], tf = EV.tarifas[d.z];
+      return { zona: `${m}, ${d.d}`, valor: (esp || tf).valor, tiempo: (esp || tf).tiempo, via: esp ? esp.via : EV.via };
+    }
+    return EV.local[0];
+  }
+  const cambioDestino = () => {
+    const t = tipo();
+    $("c-ver").hidden = t !== "ver"; $("c-nac").hidden = t !== "nac";
+    const z = destino();
+    $("c-envinfo").textContent = z.pendiente ? "Elige tu departamento y municipio para ver el valor del envío." : `Envío: ${z.valor ? fmt(z.valor) : "Gratis"}${z.tiempo ? ` · llega en ${z.tiempo}` : ""}. Valor estimado, te lo confirmamos por WhatsApp.`;
+    totales();
+  };
+  document.querySelectorAll('[name="c-tipo"]').forEach(x => x.onchange = cambioDestino);
+  $("c-ver").onchange = cambioDestino;
+  $("c-dep").onchange = () => { llenarMun(); cambioDestino(); };
+  $("c-mun").onchange = cambioDestino;
+  cambioDestino();
+
+  // ---------- Carrusel de la portada ----------
+  (() => {
+    const sl = [...document.querySelectorAll("#slides .slide")], dots = $("dots");
+    if (sl.length < 2) return;
+    let i = 0, t;
+    const ir = n => {
+      sl[i].classList.remove("on"); sl[i].setAttribute("aria-hidden", "true"); dots.children[i].setAttribute("aria-selected", "false");
+      i = (n + sl.length) % sl.length;
+      sl[i].classList.add("on"); sl[i].removeAttribute("aria-hidden"); dots.children[i].setAttribute("aria-selected", "true");
+    };
+    sl.forEach((_, n) => { const b = document.createElement("button"); b.type = "button"; b.role = "tab"; b.setAttribute("aria-label", `Panel ${n + 1}`); b.setAttribute("aria-selected", n === 0); b.onclick = () => { ir(n); play(); }; dots.append(b); });
+    const play = () => { clearInterval(t); if (!matchMedia("(prefers-reduced-motion: reduce)").matches) t = setInterval(() => ir(i + 1), 6500); };
+    const box = $("slides");
+    box.addEventListener("mouseenter", () => clearInterval(t)); box.addEventListener("mouseleave", play);
+    let x0 = null;
+    box.addEventListener("touchstart", e => { x0 = e.touches[0].clientX; }, { passive: true });
+    box.addEventListener("touchend", e => { if (x0 === null) return; const dx = e.changedTouches[0].clientX - x0; if (Math.abs(dx) > 40) { ir(i + (dx < 0 ? 1 : -1)); play(); } x0 = null; });
+    play();
+  })();
+  const B = T.breb || {};
+  if (B.llave) $("llave").textContent = B.llave;
+  if (B.qr) $("qr").innerHTML = `<img src="${esc(B.qr)}" alt="Código QR Bre-B de J&amp;P del Sur">`;
   T.pagos.forEach(p => { $("c-pago").add(new Option(p)); $("pagos").insertAdjacentHTML("beforeend", `<span class="chip">${esc(p)}</span>`); });
   $("anio").textContent = `© ${new Date().getFullYear()} ${T.nombre}`;
   $("abrirCarrito").onclick = abrirCarrito;

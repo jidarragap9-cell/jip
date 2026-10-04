@@ -188,3 +188,49 @@ footer .ig:hover { text-decoration: underline; }
 .igbtn { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--gold); color: var(--gold); flex: none; }
 .igbtn:hover { background: var(--gold); color: var(--black); }
 footer .ig { display: inline-flex; align-items: center; gap: 6px; }
+
+/* Carrusel de la portada: los paneles se funden con zoom suave (no se deslizan) */
+.hero .slides{display:grid;grid-template-columns:1fr;padding-block:40px 28px}
+.slide{grid-area:1/1;display:grid;grid-template-columns:1.1fr 1fr;gap:24px;align-items:center;opacity:0;visibility:hidden;transform:scale(1.06);filter:blur(6px);transition:opacity .9s ease,transform 1.2s cubic-bezier(.2,.7,.2,1),filter .9s ease,visibility 0s .9s}
+.slide.on{opacity:1;visibility:visible;transform:none;filter:none;transition:opacity .9s ease,transform 1.2s cubic-bezier(.2,.7,.2,1),filter .9s ease,visibility 0s}
+.slide [class*="a"]{transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.2,1)}
+.slide:not(.on) .a1,.slide:not(.on) .a2,.slide:not(.on) .a3,.slide:not(.on) .a4{opacity:0;transform:translateY(18px)}
+.slide.on .a1{transition-delay:.25s}.slide.on .a2{transition-delay:.4s}.slide.on .a3{transition-delay:.55s}.slide.on .a4{transition-delay:.7s}
+.hero h2.big{font:800 clamp(28px,4.2vw,48px)/1.08 var(--f-body);margin:0;text-wrap:balance}
+.hero h2.big .goldtxt{display:block}
+.dots{position:relative;display:flex;justify-content:center;gap:10px;padding-bottom:22px}
+.dots button{width:10px;height:10px;border-radius:999px;border:1px solid var(--gold);background:transparent;padding:0;cursor:pointer;transition:width .4s,background .4s}
+.dots button[aria-selected="true"]{width:28px;background:var(--gold)}
+.llave{display:flex;align-items:center;gap:12px;margin-top:18px;padding:12px 16px;border:1px solid var(--gold-lo);border-radius:14px;background:rgba(227,178,60,.08);width:fit-content}
+.llave svg{width:30px;height:30px;fill:none;stroke:var(--gold);stroke-width:1.8;stroke-linecap:round;flex:none}
+.llave small{display:block;color:var(--dim);font-size:12px}
+.llave b{font-size:18px;letter-spacing:.02em}
+.qr{justify-self:center;width:min(240px,60vw);aspect-ratio:1;border-radius:20px;background:#fff;display:grid;place-items:center;padding:14px;box-shadow:0 0 0 2px var(--gold),0 20px 50px rgba(0,0,0,.5)}
+.qr img{width:100%;height:100%;object-fit:contain}
+.qr span{color:var(--ink);font:700 18px/1.2 var(--f-body);text-align:center;opacity:.6}
+.envlist{list-style:none;padding:0;margin:16px 0 0;display:grid;gap:8px}
+.envlist li{padding-left:26px;position:relative;color:var(--dim)}
+.envlist li b{color:var(--cream)}
+.envlist li::before{content:"";position:absolute;left:0;top:.35em;width:14px;height:14px;border-radius:50%;background:var(--gold)}
+.truck{justify-self:center;position:relative;width:min(260px,60vw);aspect-ratio:1;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle,rgba(227,178,60,.18),transparent 70%);border:1px solid var(--gold-lo)}
+.truck .mk{width:55%}
+.truck .tk{position:absolute;right:6%;bottom:10%;width:30%;fill:none;stroke:var(--gold);stroke-width:1.6;background:var(--black);border-radius:50%;padding:6%;border:1px solid var(--gold)}
+@media (max-width:760px){
+  .slide{grid-template-columns:1fr}
+  .slide .qr,.slide .truck{width:min(180px,50vw)}
+  .slide .slogan{display:none}
+}
+@media (prefers-reduced-motion:reduce){.slide,.slide [class*="a"]{transition:none!important}}
+
+/* Destino del envío en el carrito */
+.destino{border:1px solid var(--soft);border-radius:12px;padding:10px 12px 12px;margin:0 0 12px;display:grid;gap:8px}
+.destino legend{font-weight:700;padding:0 6px}
+.destino .op{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--soft);border-radius:10px;cursor:pointer;font-size:15px}
+.destino .op:has(input:checked){border-color:var(--gold);background:#fff8e6}
+.destino .op input{margin-top:3px;accent-color:#b8861b;width:18px;height:18px;flex:none}
+.destino .op em{font-style:normal;color:#1f7a3a;font-weight:700;margin-left:4px}
+.destino .nac{display:grid;gap:8px}
+.destino select{width:100%}
+.destino small{color:var(--muted)}
+.destino .op input{appearance:none;-webkit-appearance:none;width:18px;height:18px;border:2px solid #b8861b;border-radius:50%;background:#fff;flex:none;margin:0}
+.destino .op input:checked{background:radial-gradient(circle,#b8861b 45%,#fff 50%)}
