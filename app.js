@@ -59,7 +59,7 @@
     const c = {
       nombre: col("nombre", "producto"), precio: head.findIndex(h => h.startsWith("precio") && !h.includes("antes")),
       antes: col("antes", "anterior"), cat: col("categor"), specs: col("caracter", "especific", "descrip"),
-      fotos: col("foto", "imagen"), video: col("video"), peso: col("peso"), dest: col("destac", "ganador"), ocultar: col("ocultar", "agotado"), enc: col("encargo")
+      fotos: col("foto", "imagen"), video: col("video"), peso: col("peso"), dest: col("destac", "ganador"), ocultar: col("ocultar", "agotado"), enc: col("encargo"), gar: col("garant")
     };
     const g = (r, k) => (c[k] >= 0 ? (r[c[k]] || "").trim() : "");
     return rows.map((r, i) => ({
@@ -74,7 +74,8 @@
       peso: num(g(r, "peso")) || 1,
       dest: si(g(r, "dest")),
       ocultar: si(g(r, "ocultar")),
-      enc: si(g(r, "enc"))
+      enc: si(g(r, "enc")),
+      gar: g(r, "gar")
     })).filter(p => p.nombre && p.precio && !p.ocultar).reverse(); // lo más nuevo primero
   }
 
@@ -82,7 +83,8 @@
   let productos = [], filtro = "Todos", busqueda = "";
   const ENC = "Por encargo", E = T.encargo || { anticipo: 0.4, dias: 20 };
   const pct = Math.round(E.anticipo * 100);
-  const anticipo = v => Math.ceil(v * E.anticipo / 1000) * 1000;
+  const anticipo = v => E.anticipo < 1 ? Math.ceil(v * E.anticipo / 1000) * 1000 : Math.min(E.anticipo, v);
+  const antTxt = E.anticipo < 1 ? `el ${pct}% de su valor` : fmt(E.anticipo);
   const listaCats = () => { const c = ["Todos", ...new Set(productos.map(p => p.cat))]; c.push(ENC); return c; };
   const enCat = (p, c) => c === "Todos" || (c === ENC ? p.enc : p.cat === c);
   let carrito = [];
@@ -144,7 +146,7 @@
     $("enc-intro").hidden = filtro !== ENC || !!q;
     if (filtro === ENC && !q) $("enc-intro").innerHTML = `<h3>⏳ Aparta productos innovadores</h3>
       <p>Productos novedosos que traemos <b>bajo pedido</b>. Así funciona:</p>
-      <ol><li>Eliges el producto y lo apartas pagando solo el <b>${pct}%</b> de su valor.</li>
+      <ol><li>Eliges el producto y lo apartas pagando solo <b>${antTxt}</b>.</li>
       <li>Lo recibes en máximo <b>${E.dias} días hábiles</b> después de confirmar tu pago.</li>
       <li>Pagas el resto cuando llegue. Si no llega a tiempo, te devolvemos tu anticipo.</li></ol>
       <a href="legal.html#encargo">Ver condiciones</a>`;
@@ -154,7 +156,7 @@
       const el = document.createElement("article"); el.className = "card";
       el.innerHTML = `<button class="open" type="button" aria-label="Ver ${esc(p.nombre)}">
         <div class="media">${p.fotos[0] ? `<img src="${esc(p.fotos[0])}" alt="" loading="lazy">` : '<span class="ph">J&amp;P</span>'}
-        ${p.dest ? '<span class="badge">Destacado</span>' : ""}${off ? `<span class="badge off">-${off}%</span>` : ""}${p.enc ? '<span class="badge enc">⏳ Por encargo</span>' : ""}</div>
+        ${p.dest ? '<span class="badge">Destacado</span>' : ""}${off ? `<span class="badge off">-${off}%</span>` : ""}${p.enc ? '<span class="badge enc">⏳ Por encargo</span>' : '<span class="badge ya">✅ Entrega inmediata</span>'}</div>
         <div class="body"><h3>${esc(p.nombre)}</h3>
         <ul class="specs">${p.specs.slice(0, 2).map(s => `<li>${esc(s)}</li>`).join("")}</ul>
         <div class="price"><b>${fmt(p.precio)}</b>${off ? `<s>${fmt(p.antes)}</s>` : ""}</div>
@@ -175,8 +177,9 @@
     $("d-specs").innerHTML = p.specs.map(s => `<li>${esc(s)}</li>`).join("");
     $("d-enc").hidden = !p.enc;
     if (p.enc) $("d-enc").innerHTML = `<b>⏳ Producto por encargo</b>
-      <span>Sepáralo con el ${pct}%: <b>${fmt(anticipo(p.precio))}</b>. El resto (${fmt(p.precio - anticipo(p.precio))}) lo pagas cuando llegue.</span>
+      <span>Sepáralo con <b>${fmt(anticipo(p.precio))}</b>. El resto (${fmt(p.precio - anticipo(p.precio))}) lo pagas cuando llegue.</span>
       <span>Llega en máximo ${E.dias} días hábiles después de confirmar tu pago.</span>`;
+    $("d-gar").innerHTML = `🛡️ <b>Garantía:</b> ${esc(p.gar || "por defectos de fábrica, consúltala por WhatsApp antes de comprar")} · <a href="legal.html#garantias" target="_blank">condiciones</a>`;
     $("d-agregar").textContent = p.enc ? "Separar por encargo" : "Agregar al carrito";
     const medios = [...p.fotos.map(src => ({ t: "img", src })), ...(p.video ? [{ t: "vid", src: p.video }] : [])];
     const ver = m => { $("d-main").innerHTML = !m ? '<span class="ph">J&amp;P</span>' : m.t === "img" ? `<img src="${esc(m.src)}" alt="${esc(p.nombre)}">` : `<iframe src="${esc(m.src)}" allow="autoplay; encrypted-media" allowfullscreen title="Video"></iframe>`; };
@@ -243,7 +246,7 @@
     $("c-tot").innerHTML = `<div><span>Productos</span><span>${fmt(sub)}</span></div>
       <div><span>Envío a ${esc(z.zona)}</span><span>${fmtEnv(env)}</span></div>
       <div class="g"><span>Total</span><span>${fmt(sub + env)}</span></div>
-      ${subEnc ? `<div class="enc-box"><div><span>💳 Pagas ahora${subDisp ? "" : ` (anticipo ${pct}%)`}</span><span>${fmt(ahora)}</span></div>
+      ${subEnc ? `<div class="enc-box"><div><span>💳 Pagas ahora${subDisp ? "" : ` (anticipo)`}</span><span>${fmt(ahora)}</span></div>
       <div><span>⏳ Pagas al recibir el encargo</span><span>${fmt(luego)}</span></div>
       <small>Los productos por encargo llegan en máximo ${E.dias} días hábiles después de confirmar tu pago.</small></div>` : ""}`;
     return { sub, kg, env, z, subEnc, ahora, luego };

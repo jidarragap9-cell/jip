@@ -16,7 +16,7 @@ window.TIENDA = {
 
   // Garantía que ofreces si el producto no indica otra.
   // Si no la anuncias, la ley asume 1 año para productos nuevos.
-  garantia: "1 año",
+  garantia: "según el producto (se indica en cada producto)",
 
   // Tu número de WhatsApp con indicativo de Colombia (57), sin espacios ni "+".
   // Aquí llegan los pedidos.
@@ -51,7 +51,7 @@ window.TIENDA = {
   // Formas de pago que se muestran al cliente.
   // Productos POR ENCARGO: el cliente separa con un anticipo y llega en X días hábiles.
   // En productos.csv escribe "Sí" en la columna "Encargo".
-  encargo: { anticipo: 0.40, dias: 20 },
+  encargo: { anticipo: 50000, dias: 20 }, // anticipo fijo en pesos por unidad (si es menor que 1, se toma como %)
 
   pagos: ["Llave Bre-B", "Nequi", "PSE", "Tarjeta", "Contraentrega"]
 };

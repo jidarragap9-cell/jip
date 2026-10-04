@@ -182,3 +182,9 @@ dialog::backdrop{background:rgba(0,0,0,.7)}
 .enc-intro a{color:var(--gold);font-weight:600}
 footer .ig { color: var(--gold, #d4af37); text-decoration: none; font-weight: 600; }
 footer .ig:hover { text-decoration: underline; }
+.badge.ya { background: #1f7a3a; color: #fff; top: auto; bottom: 8px; left: 8px; }
+.gar { font-size: .9rem; margin: .4rem 0 .8rem; opacity: .9; }
+.gar a { color: var(--gold); }
+.igbtn { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--gold); color: var(--gold); flex: none; }
+.igbtn:hover { background: var(--gold); color: var(--black); }
+footer .ig { display: inline-flex; align-items: center; gap: 6px; }
