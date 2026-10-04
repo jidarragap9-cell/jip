@@ -20,7 +20,7 @@ img{max-width:100%}
 header{position:sticky;top:0;z-index:10;background:var(--black);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top,0px)}
 .top{display:flex;align-items:center;gap:20px;padding-block:12px;flex-wrap:wrap}
 .logo{display:flex;align-items:center;gap:10px;text-decoration:none}
-.logo svg{width:64px;height:auto;flex:none}
+.logo svg,.logo img{width:64px;height:auto;flex:none}
 .logo .name{display:grid;line-height:1}
 .logo .name b{font:800 20px var(--f-logo);letter-spacing:.06em}
 .logo .name span{font:500 9px var(--f-body);letter-spacing:.32em;color:var(--dim);margin-top:4px}
@@ -136,7 +136,7 @@ dialog::backdrop{background:rgba(0,0,0,.7)}
   .hero .in,.det,.envio{grid-template-columns:1fr}
   .calc{grid-template-columns:1fr 1fr}.calc output{grid-column:1/-1}
   .slogan{transform:rotate(-5deg)}
-  .top{gap:10px;flex-wrap:nowrap}.logo .name,.cartbtn .ct{display:none}.logo svg{width:52px}.search{min-width:0}.cartbtn{padding:8px 10px}
+  .top{gap:10px;flex-wrap:nowrap}.logo .name,.cartbtn .ct{display:none}.logo svg,.logo img{width:52px}.search{min-width:0}.cartbtn{padding:8px 10px}
 }
 @media (prefers-reduced-motion:no-preference){.card{transition:transform .15s}.card:hover{transform:translateY(-2px)}}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
@@ -212,8 +212,8 @@ footer .ig { display: inline-flex; align-items: center; gap: 6px; }
 .envlist li{padding-left:26px;position:relative;color:var(--dim)}
 .envlist li b{color:var(--cream)}
 .envlist li::before{content:"";position:absolute;left:0;top:.35em;width:14px;height:14px;border-radius:50%;background:var(--gold)}
-.truck{justify-self:center;position:relative;width:min(260px,60vw);aspect-ratio:1;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle,rgba(227,178,60,.18),transparent 70%);border:1px solid var(--gold-lo)}
-.truck .mk{width:55%}
+.truck{justify-self:center;position:relative;width:min(260px,60vw);aspect-ratio:1;display:grid;place-items:center}
+.truck .mk{width:100%;height:auto}
 .truck .tk{position:absolute;right:6%;bottom:10%;width:30%;fill:none;stroke:var(--gold);stroke-width:1.6;background:var(--black);border-radius:50%;padding:6%;border:1px solid var(--gold)}
 @media (max-width:760px){
   .slide{grid-template-columns:1fr}
