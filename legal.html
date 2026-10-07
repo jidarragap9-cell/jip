@@ -8,7 +8,7 @@
 <link rel="icon" href="favicon.png" type="image/png">
 <link rel="apple-touch-icon" href="img/logo-180.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@800&family=Outfit:wght@400;600;800&display=swap">
-<link rel="stylesheet" href="styles.css?v=202610072020">
+<link rel="stylesheet" href="styles.css?v=202610072058">
 <style>
   .doc{background:var(--cream);color:var(--ink);padding-block:32px 56px}
   .doc .in{max-width:760px;display:grid;gap:8px}
@@ -146,7 +146,7 @@
 
 <footer class="gutter"><div class="in"><span class="goldtxt">SANTA ROSA DEL SUR · BOLÍVAR</span><a class="back" href="index.html">Volver a la tienda</a></div></footer>
 
-<script src="config.js?v=202610072020"></script>
+<script src="config.js?v=202610072058"></script>
 <script>
   const T = window.TIENDA, enc = T.encargo || { anticipo: 0.4, dias: 20 }, E = { nombre: T.nombre, garantia: T.garantia, pct: Math.round(enc.anticipo * 100), ant: enc.anticipo < 1 ? Math.round(enc.anticipo * 100) + "% del valor" : "$" + enc.anticipo.toLocaleString("es-CO"), dias: enc.dias, ...T.empresa };
   document.querySelectorAll("[data-e]").forEach(el => { el.textContent = E[el.dataset.e] || ""; });
