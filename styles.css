@@ -257,3 +257,4 @@ footer .ig { display: inline-flex; align-items: center; gap: 6px; }
 .guia th,.guia td{border:1px solid #e3dccd;padding:6px 8px;text-align:center}
 .guia th{background:#f1ead9}
 .guia p{font-weight:400;margin:4px 0 0;color:#555}
+.ref{display:block;margin:-4px 0 8px;font-size:11px;letter-spacing:.06em;color:#b3aa98}
