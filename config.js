@@ -25,7 +25,7 @@ window.TIENDA = {
   // Enlace CSV de la hoja de Google con tus productos
   // (Archivo > Compartir > Publicar en la web > Formato CSV).
   // Mientras esté vacío, la tienda muestra los productos de "productos.csv".
-  hojaCSV: "",
+  hojaCSV: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSfONhHMWE0cfWH-95ZF38e0RQ9hM9EFcJu5pfFrgHQtEtKZTywAVakTQS_DQVKFWVcl-GvlNi7PT7Y/pub?gid=0&single=true&output=csv",
 
   // Envíos: ahora están en el archivo envios.js (Santa Rosa, veredas y todo el país).
 
