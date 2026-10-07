@@ -16,6 +16,7 @@
     perfumeria: '<rect x="6" y="9" width="12" height="12" rx="2"/><path d="M10 9V6h4v3M12 3v3"/>',
     electrodomesticos: '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M5 9h14M9 6h.01"/>',
     belleza: '<path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M18 15l.8 2.2L21 18l-2.2.8L18 21l-.8-2.2L15 18l2.2-.8z"/>',
+    "ofertas de hoy": '<path d="M12 22c4 0 7-3 7-7 0-4-3-6-4-10-2 2-3 4-3 6-1-1-2-2-2-4-2 2-5 5-5 8 0 4 3 7 7 7z"/>',
     "por encargo": '<circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/>',
     otros: '<circle cx="12" cy="12" r="9"/><path d="M8 12h.01M12 12h.01M16 12h.01"/>'
   };
@@ -85,22 +86,27 @@
   }
 
   // ---------- Estado ----------
-  let productos = [], filtro = "Todos", subf = "", busqueda = "";
-  const ENC = "Por encargo", E = T.encargo || { anticipo: 0.4, dias: 20 };
+  let productos = [], ofertas = [], filtro = "Todos", subf = "", busqueda = "";
+  const ENC = "Por encargo", HOT = "Ofertas de hoy", E = T.encargo || { anticipo: 0.4, dias: 20 };
   const pct = Math.round(E.anticipo * 100);
   const anticipo = v => E.anticipo < 1 ? Math.ceil(v * E.anticipo / 1000) * 1000 : Math.min(E.anticipo, v);
   const antTxt = E.anticipo < 1 ? `el ${pct}% de su valor` : fmt(E.anticipo);
-  const listaCats = () => { const c = ["Todos", ...new Set(productos.map(p => p.cat))]; c.push(ENC); return c; };
-  const enCat = (p, c) => c === "Todos" || (c === ENC ? p.enc : p.cat === c && (!subf || norm(p.sub) === norm(subf)));
-  const subsDe = c => { const l = [...((T.subcategorias || {})[c] || [])]; productos.forEach(p => { if (p.cat === c && p.sub && !l.some(x => norm(x) === norm(p.sub))) l.push(p.sub); }); return l; };
+  const vigentes = () => ofertas.filter(o => o.vence > Date.now());
+  const todos = () => [...vigentes(), ...productos];
+  const listaCats = () => { const c = ["Todos", ...new Set(todos().map(p => p.cat))]; if (vigentes().length) c.splice(1, 0, HOT); c.push(ENC); return c; };
+  const enCat = (p, c) => c === "Todos" || (c === HOT ? p.hot : c === ENC ? p.enc : p.cat === c && (!subf || norm(p.sub) === norm(subf)));
+  // Oferta: precio fijo por tiempo limitado, se aparta como un encargo
+  const quedan = v => { const m = Math.max(0, Math.round((v - Date.now()) / 60000)), h = Math.floor(m / 60); return h >= 24 ? `${Math.floor(h / 24)} d ${h % 24} h` : h ? `${h} h ${m % 60} min` : `${m} min`; };
+  const conPrecio = p => !p.enc || p.hot;
+  const subsDe = c => { const l = [...((T.subcategorias || {})[c] || [])]; todos().forEach(p => { if (p.cat === c && p.sub && !l.some(x => norm(x) === norm(p.sub))) l.push(p.sub); }); return l; };
   const elegir = (c, s = "") => { filtro = c; subf = s; busqueda = ""; $("q").value = ""; cerrarMenu(); pintar(); $("vitrina").scrollIntoView({ behavior: "smooth" }); };
   let carrito = [];
-  try { carrito = JSON.parse(localStorage.getItem("jp-carrito") || "[]"); } catch { }
+  try { carrito = JSON.parse(localStorage.getItem("jp-carrito") || "[]").filter(i => !i.vence || i.vence > Date.now()); } catch { }
   const guardar = () => { try { localStorage.setItem("jp-carrito", JSON.stringify(carrito)); } catch { } };
 
   // ---------- Vitrina ----------
   function categorias() {
-    const cats = listaCats();
+    const cats = listaCats().filter(c => c !== HOT);
     $("icons").innerHTML = ""; $("nav").innerHTML = "";
     const all = document.createElement("button"); all.type = "button"; all.className = "all"; all.textContent = "☰ Categorías";
     all.setAttribute("aria-haspopup", "true"); all.setAttribute("aria-expanded", "false");
@@ -123,7 +129,7 @@
     const m = document.createElement("div"); m.id = "menuCats"; m.setAttribute("role", "menu");
     const cats = listaCats();
     cats.forEach(c => {
-      const subs = c === "Todos" || c === ENC ? [] : subsDe(c);
+      const subs = c === "Todos" || c === ENC || c === HOT ? [] : subsDe(c);
       const b = document.createElement("button"); b.type = "button"; b.setAttribute("role", "menuitem");
       if (c === filtro) b.className = "on";
       b.innerHTML = `<svg viewBox="0 0 24 24">${icon(c)}</svg><span>${esc(c)}</span>${subs.length ? '<i class="chev" aria-hidden="true"></i>' : ""}`;
@@ -151,7 +157,8 @@
   function pintar() {
     categorias();
     const q = norm(busqueda);
-    let lista = productos.filter(p => enCat(p, filtro) && (!q || norm(p.nombre + " " + p.cod + " " + p.cat + " " + p.specs.join(" ")).includes(q)));
+    pintarHot(q);
+    let lista = todos().filter(p => !(filtro === "Todos" && !q && p.hot)).filter(p => enCat(p, filtro) && (!q || norm(p.nombre + " " + p.cod + " " + p.cat + " " + p.specs.join(" ")).includes(q)));
     if (filtro === "Todos" && !q) lista = [...lista.filter(p => p.dest), ...lista.filter(p => !p.dest)];
     $("titulo").textContent = q ? `Resultados para “${busqueda}”` : filtro === "Todos" ? "Productos destacados" : subf ? `${filtro} › ${subf}` : filtro;
     const grid = $("grid"); grid.innerHTML = "";
@@ -164,20 +171,27 @@
       <li>Pagas el resto cuando llegue. Si no llega a tiempo, te devolvemos tu anticipo.</li></ol>
       <a href="legal.html#encargo">Ver condiciones</a>`;
     if (!lista.length) { grid.innerHTML = filtro === ENC && !q ? '<p class="empty">Muy pronto publicaremos aquí productos innovadores para apartar. ¿Buscas algo en especial? Escríbenos por WhatsApp y te lo conseguimos.</p>' : subf && !q ? `<p class="empty">Muy pronto tendremos productos de <b>${esc(subf)}</b>. ¿Buscas algo en especial? Escríbenos por WhatsApp y te lo conseguimos.</p>` : '<p class="empty">No encontramos productos. Prueba con otra búsqueda.</p>'; return; }
-    lista.forEach(p => {
+    lista.forEach(p => grid.append(tarjeta(p)));
+  }
+  // Franja "Ofertas de hoy" arriba de la vitrina
+  function pintarHot(q) {
+    const l = vigentes(), ver = filtro === "Todos" && !q && l.length;
+    $("hot").hidden = !ver; if (!ver) return;
+    $("hot-grid").innerHTML = ""; l.forEach(p => $("hot-grid").append(tarjeta(p)));
+  }
+  function tarjeta(p) {
       const off = p.antes > p.precio ? Math.round(100 - p.precio * 100 / p.antes) : 0;
       const el = document.createElement("article"); el.className = "card";
       el.innerHTML = `<button class="open" type="button" aria-label="Ver ${esc(p.nombre)}">
         <div class="media">${p.fotos[0] ? `<img src="${esc(p.fotos[0])}" alt="" loading="lazy">` : '<span class="ph">J&amp;P</span>'}
-        ${p.dest ? '<span class="badge">Destacado</span>' : ""}${off ? `<span class="badge off">-${off}%</span>` : ""}${p.enc ? '<span class="badge enc">⏳ Por encargo</span>' : '<span class="badge ya">✅ Entrega inmediata</span>'}</div>
+        ${p.hot ? '<span class="badge hot">🔥 Oferta</span>' : p.dest ? '<span class="badge">Destacado</span>' : ""}${off ? `<span class="badge off">-${off}%</span>` : ""}${p.hot ? `<span class="badge reloj">⏱ Termina en ${quedan(p.vence)}</span>` : p.enc ? '<span class="badge enc">⏳ Por encargo</span>' : '<span class="badge ya">✅ Entrega inmediata</span>'}</div>
         <div class="body"><h3>${esc(p.nombre)}</h3>
         <ul class="specs">${p.specs.slice(0, 2).map(s => `<li>${esc(s)}</li>`).join("")}</ul>
-        ${p.enc ? `<div class="price cot"><b>Precio a consultar</b></div><p class="sep">Apártalo con <b>${antTxt}</b> · llega en ${E.dias} días hábiles</p>` : `<div class="price"><b>${fmt(p.precio)}</b>${off ? `<s>${fmt(p.antes)}</s>` : ""}</div>`}${p.tallas.length ? `<div class="mini-tallas">${p.tallas.map(x => `<span class="${x.ok ? "" : "off"}">${convTalla(x.t, tipoTalla(p))[0]}</span>`).join("")}</div>` : ""}</div></button>
-        <button class="buy" type="button">${p.tallas.length ? "Comprar" : p.enc ? "💬 Cotizar por WhatsApp" : "Agregar al carrito"}</button>`;
+        ${p.hot ? `<div class="price"><b>${fmt(p.precio)}</b>${off ? `<s>${fmt(p.antes)}</s>` : ""}</div><p class="sep">⏳ Por encargo · apártalo con <b>${fmt(anticipo(p.precio))}</b> · llega en ${E.dias} días hábiles</p>` : p.enc ? `<div class="price cot"><b>Precio a consultar</b></div><p class="sep">Apártalo con <b>${antTxt}</b> · llega en ${E.dias} días hábiles</p>` : `<div class="price"><b>${fmt(p.precio)}</b>${off ? `<s>${fmt(p.antes)}</s>` : ""}</div>`}${p.tallas.length ? `<div class="mini-tallas">${p.tallas.map(x => `<span class="${x.ok ? "" : "off"}">${convTalla(x.t, tipoTalla(p))[0]}</span>`).join("")}</div>` : ""}</div></button>
+        <button class="buy" type="button">${p.tallas.length ? (p.hot ? "Apartar" : "Comprar") : p.hot ? "Apartar" : p.enc ? "💬 Cotizar por WhatsApp" : "Agregar al carrito"}</button>`;
       el.querySelector(".open").onclick = () => abrir(p);
-      el.querySelector(".buy").onclick = e => { if (p.tallas.length) return abrir(p); if (p.enc) return cotizar(p); agregar(p, 1); e.target.textContent = "Agregado ✓"; aviso(`✨ ¡Buena elección! ${p.nombre} ya está en tu carrito`); };
-      grid.append(el);
-    });
+      el.querySelector(".buy").onclick = e => { if (p.tallas.length) return abrir(p); if (!conPrecio(p)) return cotizar(p); agregar(p, 1); e.target.textContent = "Agregado ✓"; aviso(`✨ ¡Buena elección! ${p.nombre} ya está en tu carrito`); };
+      return el;
   }
 
   // ---------- Tallas: la hoja guarda la talla americana; se muestra la colombiana ----------
@@ -213,15 +227,18 @@
       $("d-tallas").querySelector(".ops").append(b);
     });
     $("d-cat").textContent = p.cat; $("d-nombre").textContent = p.nombre; $("d-cod").textContent = p.cod ? `Ref. ${p.cod}` : "";
-    $("d-precio").innerHTML = p.enc ? "<b>Precio a consultar</b>" : `<b>${fmt(p.precio)}</b>${p.antes > p.precio ? `<s>${fmt(p.antes)}</s>` : ""}`;
+    $("d-precio").innerHTML = !conPrecio(p) ? "<b>Precio a consultar</b>" : `<b>${fmt(p.precio)}</b>${p.antes > p.precio ? `<s>${fmt(p.antes)}</s>` : ""}`;
     $("d-specs").innerHTML = p.specs.map(s => `<li>${esc(s)}</li>`).join("");
     $("d-enc").hidden = !p.enc;
-    if (p.enc) $("d-enc").innerHTML = `<b>⏳ Producto por encargo</b>
+    if (p.hot) $("d-enc").innerHTML = `<b>🔥 Oferta por tiempo limitado · termina en ${quedan(p.vence)}</b>
+      <span>Producto por encargo: lo apartas con <b>${fmt(anticipo(p.precio))}</b> y el resto lo pagas cuando llegue.</span>
+      <span>El precio queda fijo si lo apartas antes de que termine la oferta. Llega en máximo ${E.dias} días hábiles después de confirmar tu pago.</span>`;
+    else if (p.enc) $("d-enc").innerHTML = `<b>⏳ Producto por encargo</b>
       <span>Escríbenos por WhatsApp y te damos el precio. Lo apartas con <b>${antTxt}</b> y el resto lo pagas cuando llegue.</span>
       <span>Llega en máximo ${E.dias} días hábiles después de confirmar tu pago.</span>`;
     $("d-gar").innerHTML = `🛡️ <b>Garantía:</b> ${esc(p.gar || "por defectos de fábrica, consúltala por WhatsApp antes de comprar")} · <a href="legal.html#garantias" target="_blank">condiciones</a>`;
-    $("d-agregar").style.display = p.enc ? "none" : ""; $("d-agregar").textContent = "Agregar al carrito"; $("d-menos").parentElement.style.display = p.enc ? "none" : "";
-    $("d-ws").textContent = p.enc ? "💬 Cotizar por WhatsApp" : "Preguntar por WhatsApp";
+    $("d-agregar").style.display = conPrecio(p) ? "" : "none"; $("d-agregar").textContent = p.hot ? "Apartar" : "Agregar al carrito"; $("d-menos").parentElement.style.display = conPrecio(p) ? "" : "none";
+    $("d-ws").textContent = conPrecio(p) ? "Preguntar por WhatsApp" : "💬 Cotizar por WhatsApp";
     const medios = [...p.fotos.map(src => ({ t: "img", src })), ...(p.video ? [{ t: "vid", src: p.video }] : [])];
     const ver = m => { $("d-main").innerHTML = !m ? '<span class="ph">J&amp;P</span>' : m.t === "img" ? `<img src="${esc(m.src)}" alt="${esc(p.nombre)}">` : `<iframe src="${esc(m.src)}" allow="autoplay; encrypted-media" allowfullscreen title="Video"></iframe>`; };
     ver(medios[0]);
@@ -238,12 +255,12 @@
   const sinTalla = () => { if (actual.tallas.length && !talla) { aviso("👟 Primero elige tu talla"); $("d-tallas").scrollIntoView({ behavior: "smooth", block: "center" }); return true; } };
   $("d-agregar").onclick = () => { if (sinTalla()) return; agregar(actual, cant, talla); $("detalle").close(); abrirCarrito(); };
   const cotizar = (p, t = "") => ws(`⛰️✨ *¡Hola, ${T.nombre}!*\n\nQuiero cotizar este producto *por encargo* 👇\n🔸 *${p.nombre}*${p.cod ? ` (Ref. ${p.cod})` : ""}${t ? `\n📏 Talla: *${t}*` : ""}\n\n¿Cuál es el precio para apartarlo? 🙌`);
-  $("d-ws").onclick = () => actual.enc ? cotizar(actual, talla) : ws(`⛰️✨ *¡Hola, ${T.nombre}!*\n\nMe interesa este producto 👇\n🔸 *${actual.nombre}*${actual.cod ? ` (Ref. ${actual.cod})` : ""}${talla ? `\n📏 Talla: *${talla}*` : ""}\n💰 ${fmt(actual.precio)}\n\n¿Me dan más información? 🙌`);
+  $("d-ws").onclick = () => !conPrecio(actual) ? cotizar(actual, talla) : ws(`⛰️✨ *¡Hola, ${T.nombre}!*\n\nMe interesa este producto 👇\n🔸 *${actual.nombre}*${actual.cod ? ` (Ref. ${actual.cod})` : ""}${talla ? `\n📏 Talla: *${talla}*` : ""}\n💰 ${fmt(actual.precio)}\n\n¿Me dan más información? 🙌`);
 
   // ---------- Carrito ----------
   function agregar(p, n, t = "") {
     const it = carrito.find(i => i.nombre === p.nombre && (i.talla || "") === t);
-    if (it) it.cant += n; else carrito.push({ nombre: p.nombre, cod: p.cod, talla: t, precio: p.precio, peso: p.peso, foto: p.fotos[0] || "", enc: !!p.enc, cant: n });
+    if (it) it.cant += n; else carrito.push({ nombre: p.nombre, cod: p.cod, talla: t, precio: p.precio, peso: p.peso, foto: p.fotos[0] || "", enc: !!p.enc, vence: p.vence || 0, cant: n });
     guardar(); contador();
   }
   let avisoT;
@@ -298,7 +315,7 @@
     e.preventDefault();
     if (destino().pendiente) { aviso("📍 Elige el departamento y el municipio del envío"); $("c-dep").focus(); return; }
     const { sub, env, z, subEnc, ahora, luego } = totales();
-    const lineas = carrito.map(i => `🔸 ${i.cant} × ${i.nombre}${i.cod ? ` [${i.cod}]` : ""}${i.talla ? ` (talla ${i.talla})` : ""}${i.enc ? " ⏳ *(por encargo)*" : ""}\n      ${fmt(i.precio * i.cant)}`).join("\n");
+    const lineas = carrito.map(i => `🔸 ${i.cant} × ${i.nombre}${i.cod ? ` [${i.cod}]` : ""}${i.talla ? ` (talla ${i.talla})` : ""}${i.vence ? " 🔥 *(oferta)*" : ""}${i.enc ? " ⏳ *(por encargo)*" : ""}\n      ${fmt(i.precio * i.cant)}`).join("\n");
     ws([
       `⛰️✨ *¡Hola, ${T.nombre}!* ✨⛰️`,
       `Encontré oro en su tienda y quiero hacer este pedido 🛒`,
@@ -402,5 +419,20 @@
     }
     pintar();
   }
-  contador(); cargar();
+  // Ofertas de hoy: las publica el botón de ofertas en la hoja y se ocultan solas al vencer
+  async function cargarOfertas() {
+    if (!T.ofertasURL) return;
+    try {
+      const r = await fetch(T.ofertasURL + "?accion=ofertas&t=" + Date.now());
+      ofertas = (await r.json()).map((o, i) => ({
+        id: "hot" + i, hot: true, enc: true, nombre: o.nombre, precio: num(o.precio), antes: num(o.antes), cat: o.cat || "Otros", sub: o.sub || "", cod: "",
+        specs: o.specs || [], fotos: (o.fotos || []).map(toImg), video: "", peso: 1, dest: false, gar: "por defectos de fábrica", vence: Date.parse(o.vence),
+        tallas: String(o.tallas || "").split(/[,;\n]+/).map(s => s.trim()).filter(Boolean).map(s => { const [t, n] = s.split(":").map(x => x.trim()); return { t, ok: n === undefined || num(n) > 0 }; })
+      })).filter(o => o.nombre && o.precio && o.vence > Date.now());
+      pintar();
+    } catch { }
+  }
+  // Cada minuto se actualiza el contador y desaparecen las ofertas vencidas
+  setInterval(() => { if (ofertas.length && !$("detalle").open) pintar(); }, 60000);
+  contador(); cargar(); cargarOfertas();
 })();

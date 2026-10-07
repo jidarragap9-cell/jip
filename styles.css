@@ -261,3 +261,12 @@ footer .ig { display: inline-flex; align-items: center; gap: 6px; }
 .mini-tallas{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
 .mini-tallas span{font-size:12px;font-weight:600;padding:2px 8px;border:1px solid #c9a24a;border-radius:6px;color:#8a6a1f}
 .mini-tallas span.off{opacity:.35;text-decoration:line-through}
+
+/* Ofertas de hoy */
+.hot{margin:0 0 26px;min-width:0}
+.hot .sec-h{flex-wrap:wrap;row-gap:2px}
+.hot .sec-h h2{color:#c2410c}
+.hot-row{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(200px,230px);gap:14px;overflow-x:auto;padding-bottom:8px;scroll-snap-type:x mandatory}
+.hot-row .card{scroll-snap-align:start;border-color:#e3b23c}
+.badge.hot{background:#c2410c;color:#fff}
+.badge.reloj{background:#0a0907;color:#ffe08a;top:auto;bottom:8px;left:8px;text-transform:none;letter-spacing:0}

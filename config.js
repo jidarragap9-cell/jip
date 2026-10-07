@@ -27,6 +27,10 @@ window.TIENDA = {
   // Mientras esté vacío, la tienda muestra los productos de "productos.csv".
   hojaCSV: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSfONhHMWE0cfWH-95ZF38e0RQ9hM9EFcJu5pfFrgHQtEtKZTywAVakTQS_DQVKFWVcl-GvlNi7PT7Y/pub?gid=0&single=true&output=csv",
 
+  // Ofertas de hoy: URL de la aplicación web de Apps Script de la hoja (termina en /exec).
+  // Mientras esté vacía, la sección de ofertas no aparece.
+  ofertasURL: "https://script.google.com/macros/s/AKfycbyG69IGAl-4Sn8yr6hWredGPu5CkMBtGq-vG75rNF9e4yMox74SyxwaIotlj-y5dB-J2Q/exec",
+
   // Envíos: ahora están en el archivo envios.js (Santa Rosa, veredas y todo el país).
 
   // Formas de pago que se muestran al cliente.

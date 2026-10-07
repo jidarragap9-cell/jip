@@ -8,7 +8,7 @@
 <link rel="icon" href="favicon.png" type="image/png">
 <link rel="apple-touch-icon" href="img/logo-180.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@800&family=Outfit:wght@400;600;800&display=swap">
-<link rel="stylesheet" href="styles.css?v=202610072002">
+<link rel="stylesheet" href="styles.css?v=202610072020">
 <style>
   .doc{background:var(--cream);color:var(--ink);padding-block:32px 56px}
   .doc .in{max-width:760px;display:grid;gap:8px}
@@ -59,6 +59,7 @@
   <p>Algunos productos se traen bajo pedido y están marcados como <strong>"Por encargo"</strong>. Para estos productos:</p>
   <ul>
     <li>El precio de cada producto por encargo se informa por WhatsApp antes de apartarlo, y queda fijo desde que confirmas tu anticipo.</li>
+    <li>Los productos de <strong>"Ofertas de hoy"</strong> muestran su precio y la hora en que termina la oferta. El precio publicado se respeta si apartas el producto antes de que termine; después, la oferta deja de mostrarse.</li>
     <li>Los separas pagando un <strong>anticipo de <span data-e="ant"></span></strong> por unidad (si el producto vale menos, pagas su valor total). El saldo se paga cuando el producto llegue, antes de la entrega.</li>
     <li>El producto llega en un plazo <strong>máximo de <span data-e="dias"></span> días hábiles</strong> contados desde que confirmamos tu pago. Te informaremos el avance por WhatsApp.</li>
     <li>Si no podemos entregarlo en ese plazo, te avisaremos y podrás esperar o pedir la <strong>devolución total del anticipo</strong>, que haremos en máximo 30 días calendario.</li>
@@ -145,7 +146,7 @@
 
 <footer class="gutter"><div class="in"><span class="goldtxt">SANTA ROSA DEL SUR · BOLÍVAR</span><a class="back" href="index.html">Volver a la tienda</a></div></footer>
 
-<script src="config.js?v=202610072002"></script>
+<script src="config.js?v=202610072020"></script>
 <script>
   const T = window.TIENDA, enc = T.encargo || { anticipo: 0.4, dias: 20 }, E = { nombre: T.nombre, garantia: T.garantia, pct: Math.round(enc.anticipo * 100), ant: enc.anticipo < 1 ? Math.round(enc.anticipo * 100) + "% del valor" : "$" + enc.anticipo.toLocaleString("es-CO"), dias: enc.dias, ...T.empresa };
   document.querySelectorAll("[data-e]").forEach(el => { el.textContent = E[el.dataset.e] || ""; });
