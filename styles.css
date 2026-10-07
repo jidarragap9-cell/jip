@@ -247,3 +247,13 @@ footer .ig { display: inline-flex; align-items: center; gap: 6px; }
 .tallas button[aria-pressed="true"]{border-color:#b8861b;background:#b8861b;color:#fff}
 .tallas button:disabled{opacity:.35;text-decoration:line-through;cursor:not-allowed;background:#f1ede4}
 #d-enc[hidden],.tallas[hidden]{display:none}
+.tallas p small{font-weight:400;color:#6b6357}
+.tallas .ops button{display:grid;place-items:center;gap:1px;min-width:58px;line-height:1.1}
+.tallas .ops button b{font-size:16px}
+.tallas .ops button small{font-size:10.5px;font-weight:500;opacity:.75}
+.guia{margin-top:10px;font-size:13px}
+.guia summary{cursor:pointer;color:#8a6414;font-weight:600}
+.guia table{border-collapse:collapse;width:100%;margin:8px 0;font-size:13px}
+.guia th,.guia td{border:1px solid #e3dccd;padding:6px 8px;text-align:center}
+.guia th{background:#f1ead9}
+.guia p{font-weight:400;margin:4px 0 0;color:#555}

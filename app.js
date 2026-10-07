@@ -179,16 +179,37 @@
     });
   }
 
+  // ---------- Tallas: la hoja guarda la talla americana; se muestra la colombiana ----------
+  const tipoTalla = p => { const s = norm(p.sub + " " + p.nombre); if (p.cat === "Calzado") return /mujer/.test(s) ? "zm" : "zh"; if (/gorra/.test(s)) return "gorra"; if (p.cat === "Moda") return "ropa"; return ""; };
+  const ZAP = { zh: 32, zm: 29 }; // talla colombiana ≈ talla US + este número
+  const ROPA = { XS: "XS", S: "S", M: "M", L: "L", XL: "XL", XXL: "XXL" };
+  function convTalla(t, tipo) {
+    const n = parseFloat(String(t).replace(",", "."));
+    if (ZAP[tipo] && !isNaN(n)) return [String(n + ZAP[tipo]).replace(".", ","), `US ${String(n).replace(".", ",")}`];
+    if (tipo === "ropa" && ROPA[t.toUpperCase()]) return [t.toUpperCase(), `US ${t.toUpperCase()}`];
+    return [t, ""];
+  }
+  const tabla = (h, f) => `<table><tr>${h.map(x => `<th>${x}</th>`).join("")}</tr>${f.map(r => `<tr>${r.map(x => `<td>${x}</td>`).join("")}</tr>`).join("")}</table>`;
+  const GUIA = {
+    zh: tabla(["Colombia", "US", "Largo del pie"], [["39", "7", "25 cm"], ["40", "8", "26 cm"], ["41", "9", "27 cm"], ["41,5", "9,5", "27,5 cm"], ["42", "10", "28 cm"], ["43", "11", "29 cm"], ["44", "12", "30 cm"]]) + "<p>Mide tu pie del talón a la punta del dedo más largo. Si quedas entre dos tallas, elige la más grande.</p>",
+    zm: tabla(["Colombia", "US", "Largo del pie"], [["34", "5", "22 cm"], ["35", "6", "23 cm"], ["36", "7", "24 cm"], ["37", "8", "25 cm"], ["37,5", "8,5", "25,5 cm"], ["38", "9", "26 cm"], ["39", "10", "27 cm"]]) + "<p>Mide tu pie del talón a la punta del dedo más largo. Si quedas entre dos tallas, elige la más grande.</p>",
+    ropa: tabla(["Talla", "Pecho", "Cintura"], [["S", "86 a 94 cm", "71 a 79 cm"], ["M", "94 a 102 cm", "79 a 87 cm"], ["L", "102 a 110 cm", "87 a 95 cm"], ["XL", "110 a 118 cm", "95 a 103 cm"], ["XXL", "118 a 126 cm", "103 a 111 cm"]]) + "<p>Las tallas americanas suelen ser un poco más amplias. Si dudas, escríbenos por WhatsApp y te ayudamos.</p>",
+    gorra: "<p>Talla única con correa ajustable: le queda a la mayoría de adultos (54 a 60 cm de contorno de cabeza).</p>"
+  };
+
   // ---------- Detalle ----------
   let actual = null, cant = 1, talla = "";
   function abrir(p) {
     actual = p; cant = 1; talla = ""; $("d-cant").textContent = 1;
-    $("d-tallas").hidden = !p.tallas.length; $("d-tallas").innerHTML = p.tallas.length ? '<p>Elige tu talla</p><div></div>' : "";
+    const tipo = tipoTalla(p);
+    $("d-tallas").hidden = !p.tallas.length; $("d-tallas").innerHTML = p.tallas.length ? `<p>Elige tu talla <small>(talla colombiana)</small></p><div class="ops"></div>${GUIA[tipo] ? `<details class="guia"><summary>📏 Guía de tallas</summary>${GUIA[tipo]}</details>` : ""}` : "";
     p.tallas.forEach(({ t, ok }) => {
-      const b = document.createElement("button"); b.type = "button"; b.textContent = t; b.disabled = !ok;
+      const [co, us] = convTalla(t, tipo);
+      const b = document.createElement("button"); b.type = "button"; b.disabled = !ok;
+      b.innerHTML = `<b>${esc(co)}</b>${us ? `<small>${esc(us)}</small>` : ""}`;
       b.setAttribute("aria-pressed", "false"); if (!ok) b.title = "Agotada";
-      b.onclick = () => { talla = t; $("d-tallas").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b)); };
-      $("d-tallas").querySelector("div").append(b);
+      b.onclick = () => { talla = us ? `${co} (${us})` : co; $("d-tallas").querySelectorAll(".ops button").forEach(x => x.setAttribute("aria-pressed", x === b)); };
+      $("d-tallas").querySelector(".ops").append(b);
     });
     $("d-cat").textContent = p.cat; $("d-nombre").textContent = p.nombre;
     $("d-precio").innerHTML = p.enc ? "<b>Precio a consultar</b>" : `<b>${fmt(p.precio)}</b>${p.antes > p.precio ? `<s>${fmt(p.antes)}</s>` : ""}`;
