@@ -60,7 +60,7 @@
     const c = {
       nombre: col("nombre", "producto"), precio: head.findIndex(h => h.startsWith("precio") && !h.includes("antes")),
       antes: col("antes", "anterior"), cat: head.findIndex(h => h.startsWith("categor")), sub: col("subcat"), specs: col("caracter", "especific", "descrip"),
-      fotos: col("foto", "imagen"), video: col("video"), peso: col("peso"), dest: col("destac", "ganador"), ocultar: col("ocultar", "agotado"), enc: col("encargo"), gar: col("garant")
+      fotos: col("foto", "imagen"), video: col("video"), peso: col("peso"), dest: col("destac", "ganador"), ocultar: col("ocultar", "agotado"), enc: col("encargo"), gar: col("garant"), tallas: col("talla")
     };
     const g = (r, k) => (c[k] >= 0 ? (r[c[k]] || "").trim() : "");
     return rows.map((r, i) => ({
@@ -77,7 +77,9 @@
       dest: si(g(r, "dest")),
       ocultar: si(g(r, "ocultar")),
       enc: si(g(r, "enc")),
-      gar: g(r, "gar")
+      gar: g(r, "gar"),
+      // Tallas: "S, M, L:0" → la que tiene :0 está agotada
+      tallas: g(r, "tallas").split(/[,;\n]+/).map(s => s.trim()).filter(Boolean).map(s => { const [t, n] = s.split(":").map(x => x.trim()); return { t, ok: n === undefined || num(n) > 0 }; })
     })).filter(p => p.nombre && (p.precio || p.enc) && !p.ocultar).reverse(); // lo más nuevo primero
   }
 
@@ -170,17 +172,24 @@
         <div class="body"><h3>${esc(p.nombre)}</h3>
         <ul class="specs">${p.specs.slice(0, 2).map(s => `<li>${esc(s)}</li>`).join("")}</ul>
         ${p.enc ? `<div class="price cot"><b>Precio a consultar</b></div><p class="sep">Apártalo con <b>${antTxt}</b> · llega en ${E.dias} días hábiles</p>` : `<div class="price"><b>${fmt(p.precio)}</b>${off ? `<s>${fmt(p.antes)}</s>` : ""}</div>`}</div></button>
-        <button class="buy" type="button">${p.enc ? "💬 Cotizar por WhatsApp" : "Agregar al carrito"}</button>`;
+        <button class="buy" type="button">${p.tallas.length ? "Elegir talla" : p.enc ? "💬 Cotizar por WhatsApp" : "Agregar al carrito"}</button>`;
       el.querySelector(".open").onclick = () => abrir(p);
-      el.querySelector(".buy").onclick = e => { if (p.enc) return cotizar(p); agregar(p, 1); e.target.textContent = "Agregado ✓"; aviso(`✨ ¡Buena elección! ${p.nombre} ya está en tu carrito`); };
+      el.querySelector(".buy").onclick = e => { if (p.tallas.length) return abrir(p); if (p.enc) return cotizar(p); agregar(p, 1); e.target.textContent = "Agregado ✓"; aviso(`✨ ¡Buena elección! ${p.nombre} ya está en tu carrito`); };
       grid.append(el);
     });
   }
 
   // ---------- Detalle ----------
-  let actual = null, cant = 1;
+  let actual = null, cant = 1, talla = "";
   function abrir(p) {
-    actual = p; cant = 1; $("d-cant").textContent = 1;
+    actual = p; cant = 1; talla = ""; $("d-cant").textContent = 1;
+    $("d-tallas").hidden = !p.tallas.length; $("d-tallas").innerHTML = p.tallas.length ? '<p>Elige tu talla</p><div></div>' : "";
+    p.tallas.forEach(({ t, ok }) => {
+      const b = document.createElement("button"); b.type = "button"; b.textContent = t; b.disabled = !ok;
+      b.setAttribute("aria-pressed", "false"); if (!ok) b.title = "Agotada";
+      b.onclick = () => { talla = t; $("d-tallas").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b)); };
+      $("d-tallas").querySelector("div").append(b);
+    });
     $("d-cat").textContent = p.cat; $("d-nombre").textContent = p.nombre;
     $("d-precio").innerHTML = p.enc ? "<b>Precio a consultar</b>" : `<b>${fmt(p.precio)}</b>${p.antes > p.precio ? `<s>${fmt(p.antes)}</s>` : ""}`;
     $("d-specs").innerHTML = p.specs.map(s => `<li>${esc(s)}</li>`).join("");
@@ -204,14 +213,15 @@
   }
   $("d-menos").onclick = () => { cant = Math.max(1, cant - 1); $("d-cant").textContent = cant; };
   $("d-mas").onclick = () => { cant++; $("d-cant").textContent = cant; };
-  $("d-agregar").onclick = () => { agregar(actual, cant); $("detalle").close(); abrirCarrito(); };
-  const cotizar = p => ws(`⛰️✨ *¡Hola, ${T.nombre}!*\n\nQuiero cotizar este producto *por encargo* 👇\n🔸 *${p.nombre}*\n\n¿Cuál es el precio para apartarlo? 🙌`);
-  $("d-ws").onclick = () => actual.enc ? cotizar(actual) : ws(`⛰️✨ *¡Hola, ${T.nombre}!*\n\nMe interesa este producto 👇\n🔸 *${actual.nombre}*\n💰 ${fmt(actual.precio)}\n\n¿Me dan más información? 🙌`);
+  const sinTalla = () => { if (actual.tallas.length && !talla) { aviso("👟 Primero elige tu talla"); $("d-tallas").scrollIntoView({ behavior: "smooth", block: "center" }); return true; } };
+  $("d-agregar").onclick = () => { if (sinTalla()) return; agregar(actual, cant, talla); $("detalle").close(); abrirCarrito(); };
+  const cotizar = (p, t = "") => ws(`⛰️✨ *¡Hola, ${T.nombre}!*\n\nQuiero cotizar este producto *por encargo* 👇\n🔸 *${p.nombre}*${t ? `\n📏 Talla: *${t}*` : ""}\n\n¿Cuál es el precio para apartarlo? 🙌`);
+  $("d-ws").onclick = () => actual.enc ? cotizar(actual, talla) : ws(`⛰️✨ *¡Hola, ${T.nombre}!*\n\nMe interesa este producto 👇\n🔸 *${actual.nombre}*${talla ? `\n📏 Talla: *${talla}*` : ""}\n💰 ${fmt(actual.precio)}\n\n¿Me dan más información? 🙌`);
 
   // ---------- Carrito ----------
-  function agregar(p, n) {
-    const it = carrito.find(i => i.nombre === p.nombre);
-    if (it) it.cant += n; else carrito.push({ nombre: p.nombre, precio: p.precio, peso: p.peso, foto: p.fotos[0] || "", enc: !!p.enc, cant: n });
+  function agregar(p, n, t = "") {
+    const it = carrito.find(i => i.nombre === p.nombre && (i.talla || "") === t);
+    if (it) it.cant += n; else carrito.push({ nombre: p.nombre, talla: t, precio: p.precio, peso: p.peso, foto: p.fotos[0] || "", enc: !!p.enc, cant: n });
     guardar(); contador();
   }
   let avisoT;
@@ -233,7 +243,7 @@
     carrito.forEach((i, k) => {
       const d = document.createElement("div"); d.className = "item";
       d.innerHTML = `${i.foto ? `<img src="${esc(i.foto)}" alt="">` : '<span class="mini"></span>'}
-        <div><p>${i.enc ? '<span class="tag-enc">⏳ Por encargo</span> ' : ""}${esc(i.nombre)}</p><small>${fmt(i.precio)} c/u · ${fmt(i.precio * i.cant)}</small>
+        <div><p>${i.enc ? '<span class="tag-enc">⏳ Por encargo</span> ' : ""}${esc(i.nombre)}${i.talla ? ` · <b>Talla ${esc(i.talla)}</b>` : ""}</p><small>${fmt(i.precio)} c/u · ${fmt(i.precio * i.cant)}</small>
           <div class="qty sm"><button type="button" class="m" aria-label="Quitar una unidad">−</button><span>${i.cant}</span><button type="button" class="p" aria-label="Agregar una unidad">+</button></div></div>
         <button class="x" type="button">Quitar</button>`;
       const cambiar = n => { i.cant += n; if (i.cant < 1) carrito.splice(k, 1); guardar(); contador(); pintarCarrito(); };
@@ -266,7 +276,7 @@
     e.preventDefault();
     if (destino().pendiente) { aviso("📍 Elige el departamento y el municipio del envío"); $("c-dep").focus(); return; }
     const { sub, env, z, subEnc, ahora, luego } = totales();
-    const lineas = carrito.map(i => `🔸 ${i.cant} × ${i.nombre}${i.enc ? " ⏳ *(por encargo)*" : ""}\n      ${fmt(i.precio * i.cant)}`).join("\n");
+    const lineas = carrito.map(i => `🔸 ${i.cant} × ${i.nombre}${i.talla ? ` (talla ${i.talla})` : ""}${i.enc ? " ⏳ *(por encargo)*" : ""}\n      ${fmt(i.precio * i.cant)}`).join("\n");
     ws([
       `⛰️✨ *¡Hola, ${T.nombre}!* ✨⛰️`,
       `Encontré oro en su tienda y quiero hacer este pedido 🛒`,
