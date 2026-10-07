@@ -29,7 +29,7 @@ window.TIENDA = {
 
   // Ofertas de hoy: URL de la aplicación web de Apps Script de la hoja (termina en /exec).
   // Mientras esté vacía, la sección de ofertas no aparece.
-  ofertasURL: "https://script.google.com/macros/s/AKfycbyG69IGAl-4Sn8yr6hWredGPu5CkMBtGq-vG75rNF9e4yMox74SyxwaIotlj-y5dB-J2Q/exec",
+  ofertasURL: "https://script.google.com/macros/s/AKfycbxA49FGXouudCrBWUJmC8StDdDqxoDmvJp99tcL3qEsH1G-3uAnR9qbBHSttbQeOrRoLw/exec",
 
   // Envíos: ahora están en el archivo envios.js (Santa Rosa, veredas y todo el país).
 
