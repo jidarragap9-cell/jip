@@ -258,3 +258,6 @@ footer .ig { display: inline-flex; align-items: center; gap: 6px; }
 .guia th{background:#f1ead9}
 .guia p{font-weight:400;margin:4px 0 0;color:#555}
 .ref{display:block;margin:-4px 0 8px;font-size:11px;letter-spacing:.06em;color:#b3aa98}
+.mini-tallas{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.mini-tallas span{font-size:12px;font-weight:600;padding:2px 8px;border:1px solid #c9a24a;border-radius:6px;color:#8a6a1f}
+.mini-tallas span.off{opacity:.35;text-decoration:line-through}

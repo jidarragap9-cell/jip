@@ -172,8 +172,8 @@
         ${p.dest ? '<span class="badge">Destacado</span>' : ""}${off ? `<span class="badge off">-${off}%</span>` : ""}${p.enc ? '<span class="badge enc">⏳ Por encargo</span>' : '<span class="badge ya">✅ Entrega inmediata</span>'}</div>
         <div class="body"><h3>${esc(p.nombre)}</h3>
         <ul class="specs">${p.specs.slice(0, 2).map(s => `<li>${esc(s)}</li>`).join("")}</ul>
-        ${p.enc ? `<div class="price cot"><b>Precio a consultar</b></div><p class="sep">Apártalo con <b>${antTxt}</b> · llega en ${E.dias} días hábiles</p>` : `<div class="price"><b>${fmt(p.precio)}</b>${off ? `<s>${fmt(p.antes)}</s>` : ""}</div>`}</div></button>
-        <button class="buy" type="button">${p.tallas.length ? "Elegir talla" : p.enc ? "💬 Cotizar por WhatsApp" : "Agregar al carrito"}</button>`;
+        ${p.enc ? `<div class="price cot"><b>Precio a consultar</b></div><p class="sep">Apártalo con <b>${antTxt}</b> · llega en ${E.dias} días hábiles</p>` : `<div class="price"><b>${fmt(p.precio)}</b>${off ? `<s>${fmt(p.antes)}</s>` : ""}</div>`}${p.tallas.length ? `<div class="mini-tallas">${p.tallas.map(x => `<span class="${x.ok ? "" : "off"}">${convTalla(x.t, tipoTalla(p))[0]}</span>`).join("")}</div>` : ""}</div></button>
+        <button class="buy" type="button">${p.tallas.length ? "Comprar" : p.enc ? "💬 Cotizar por WhatsApp" : "Agregar al carrito"}</button>`;
       el.querySelector(".open").onclick = () => abrir(p);
       el.querySelector(".buy").onclick = e => { if (p.tallas.length) return abrir(p); if (p.enc) return cotizar(p); agregar(p, 1); e.target.textContent = "Agregado ✓"; aviso(`✨ ¡Buena elección! ${p.nombre} ya está en tu carrito`); };
       grid.append(el);
