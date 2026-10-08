@@ -185,7 +185,7 @@
       const el = document.createElement("article"); el.className = "card";
       el.innerHTML = `<button class="open" type="button" aria-label="Ver ${esc(p.nombre)}">
         <div class="media">${p.fotos[0] ? `<img src="${esc(p.fotos[0])}" alt="" loading="lazy">` : '<span class="ph">J&amp;P</span>'}
-        ${p.hot ? '<span class="badge hot">🔥 Oferta</span>' : p.dest ? '<span class="badge">Destacado</span>' : ""}${off ? `<span class="badge off">-${off}%</span>` : ""}${p.hot ? `<span class="badge reloj">⏱ Termina en ${quedan(p.vence)}</span>` : p.enc ? '<span class="badge enc">⏳ Por encargo</span>' : '<span class="badge ya">✅ Entrega inmediata</span>'}</div>
+        ${p.hot && off ? '<span class="badge hot">🔥 Promoción</span>' : p.dest && !p.hot ? '<span class="badge">Destacado</span>' : ""}${off ? `<span class="badge off">-${off}%</span>` : ""}${p.hot ? `<span class="badge reloj">⏱ Termina en ${quedan(p.vence)}</span>` : p.enc ? '<span class="badge enc">⏳ Por encargo</span>' : '<span class="badge ya">✅ Entrega inmediata</span>'}</div>
         <div class="body"><h3>${esc(p.nombre)}</h3>
         ${p.hot ? "" : `<ul class="specs">${p.specs.slice(0, 2).map(s => `<li>${esc(s)}</li>`).join("")}</ul>`}
         ${p.hot ? `<div class="price">${conPres(p) ? "<small>Desde</small> " : ""}<b>${fmt(p.precio)}</b>${off ? `<s>${fmt(p.antes)}</s>` : ""}</div><p class="sep">⏳ Por encargo · apártalo con <b>${fmt(anticipo(p.precio))}</b> · llega en ${E.dias} días hábiles</p>` : p.enc ? `<div class="price cot"><b>Precio a consultar</b></div><p class="sep">Apártalo con <b>${antTxt}</b> · llega en ${E.dias} días hábiles</p>` : `<div class="price"><b>${fmt(p.precio)}</b>${off ? `<s>${fmt(p.antes)}</s>` : ""}</div>`}${p.tallas.length ? `<div class="mini-tallas">${p.tallas.map(x => `<span class="${x.ok ? "" : "off"}">${convTalla(x.t, tipoTalla(p))[0]}</span>`).join("")}</div>` : ""}</div></button>
@@ -234,7 +234,7 @@
     $("d-precio").innerHTML = !conPrecio(p) ? "<b>Precio a consultar</b>" : `<b>${fmt(p.precio)}</b>${p.antes > p.precio && p.antes < p.precio * 10 ? `<s>${fmt(p.antes)}</s>` : ""}`;
     $("d-specs").innerHTML = p.specs.map(s => `<li>${esc(s)}</li>`).join("");
     $("d-enc").hidden = !p.enc;
-    if (p.hot) $("d-enc").innerHTML = `<b>🔥 Oferta por tiempo limitado · termina en ${quedan(p.vence)}</b>
+    if (p.hot) $("d-enc").innerHTML = `<b>${p.antes > p.precio ? "🔥 Promoción" : "⏱ Precio"} por tiempo limitado · termina en ${quedan(p.vence)}</b>
       <span>Producto por encargo: lo apartas con <b>${fmt(anticipo(p.precio))}</b> y el resto lo pagas cuando llegue.</span>
       <span>El precio queda fijo si lo apartas antes de que termine la oferta. Llega en máximo ${E.dias} días hábiles después de confirmar tu pago.</span>`;
     else if (p.enc) $("d-enc").innerHTML = `<b>⏳ Producto por encargo</b>
