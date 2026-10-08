@@ -269,6 +269,13 @@ footer .ig { display: inline-flex; align-items: center; gap: 6px; }
 .hot-row{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(200px,230px);gap:14px;overflow-x:auto;padding-bottom:8px;scroll-snap-type:x mandatory}
 .hot-row .card{scroll-snap-align:start;border-color:#e3b23c}
 .badge.hot{background:#c2410c;color:#fff}
+.hot-cats{display:flex;gap:8px;overflow-x:auto;padding:0 0 10px;scrollbar-width:none}
+.hot-cats::-webkit-scrollbar{display:none}
+.hot-cats button{flex:none;display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:999px;border:1px solid #e3b23c;background:#fff;color:#1a1408;font:600 13px var(--f-body);cursor:pointer}
+.hot-cats button svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.hot-cats button small{opacity:.6;font-weight:500}
+.hot-cats button[aria-pressed="true"]{background:#c2410c;border-color:#c2410c;color:#fff}
+.cat-tag{display:block;font-size:11px;font-weight:600;letter-spacing:.02em;text-transform:uppercase;color:#8a6a1f;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .badge.reloj{background:#0a0907;color:#ffe08a;top:auto;bottom:8px;left:8px;text-transform:none;letter-spacing:0}
 #listo{border:0;border-radius:16px;padding:22px 18px 18px;width:min(340px,calc(100% - 32px));text-align:center;background:#fffdf8;color:#1a1a1a}
 #listo::backdrop{background:rgba(0,0,0,.55)}

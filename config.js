@@ -42,6 +42,7 @@ window.TIENDA = {
     "Belleza": ["Maquillaje", "Cuidado del cabello", "Cuidado de la piel", "Perfumes", "Uñas"],
     "Ropa": ["Polos y camisas", "Camisetas", "Pantalones", "Chaquetas y busos", "Gorras", "Bolsos y billeteras", "Relojes", "Gafas"],
     "Calzado": ["Tenis hombre", "Tenis mujer", "Sandalias", "Zapatos"],
+    "Niños": ["Calzado", "Ropa", "Juguetes", "Accesorios"],
     "Hogar": ["Cocina", "Decoración", "Organización", "Limpieza"]
   },
   encargo: { anticipo: 50000, dias: 20 }, // anticipo fijo en pesos por unidad (si es menor que 1, se toma como %)
