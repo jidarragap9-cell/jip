@@ -82,7 +82,7 @@
       cod: g(r, "cod"),
       // Tallas: "S, M, L:0" → la que tiene :0 está agotada
       tallas: g(r, "tallas").split(/[,;\n]+/).map(s => s.trim()).filter(Boolean).map(leerTalla)
-    })).filter(p => p.nombre && (p.precio || p.enc) && !p.ocultar).reverse(); // lo más nuevo primero
+    })).map(soloOpcionesReales).filter(p => p.nombre && (p.precio || p.enc) && !p.ocultar).reverse(); // lo más nuevo primero
   }
 
   // ---------- Estado ----------
@@ -198,6 +198,10 @@
   // Talla u opción: "38", "38:0" (agotada) o "8 oz=125000" (presentación con su propio precio)
   function leerTalla(s) { const [a, n] = s.split(":").map(x => x.trim()); const [t, pr] = a.split("=").map(x => x.trim()); return { t, ok: n === undefined || num(n) > 0, precio: num(pr || 0) }; }
   const conPres = p => p.tallas.some(x => x.precio);
+  // Talla solo en ropa y calzado. En lo demás (hogar, electrodomésticos, belleza…) solo quedan presentaciones/cantidades reales
+  // ("237 ml", "paquete x2"); un número suelto como "1" no es una opción y se descarta.
+  function esTallable(p) { return p.cat === "Ropa" || p.cat === "Calzado"; }
+  function soloOpcionesReales(p) { return esTallable(p) ? p : { ...p, tallas: p.tallas.filter(x => x.precio || /[a-záéíóúñ]/i.test(x.t)) }; }
   // ---------- Tallas: la hoja guarda la talla americana; se muestra la colombiana ----------
   const tipoTalla = p => { const s = norm(p.sub + " " + p.nombre); if (p.cat === "Calzado") return /mujer/.test(s) ? "zm" : "zh"; if (/gorra/.test(s)) return "gorra"; if (p.cat === "Ropa") return "ropa"; return ""; };
   const ZAP = { zh: 30, zm: 30 }; // talla colombiana ≈ talla US + este número
@@ -221,7 +225,7 @@
   function abrir(p) {
     actual = p; cant = 1; talla = ""; precioSel = 0; $("d-cant").textContent = 1;
     const tipo = tipoTalla(p);
-    $("d-tallas").hidden = !p.tallas.length; $("d-tallas").innerHTML = p.tallas.length ? `<p>${conPres(p) ? "Elige la presentación" : "Elige tu talla <small>(talla colombiana)</small>"}</p><div class="ops"></div>${GUIA[tipo] ? `<details class="guia"><summary>📏 Guía de tallas</summary>${GUIA[tipo]}</details>` : ""}` : "";
+    $("d-tallas").hidden = !p.tallas.length; $("d-tallas").innerHTML = p.tallas.length ? `<p>${conPres(p) ? "Elige la presentación" : esTallable(p) ? "Elige tu talla <small>(talla colombiana)</small>" : "Elige la opción"}</p><div class="ops"></div>${GUIA[tipo] ? `<details class="guia"><summary>📏 Guía de tallas</summary>${GUIA[tipo]}</details>` : ""}` : "";
     p.tallas.forEach(({ t, ok, precio }) => {
       const [co, us] = precio || !ok && conPres(p) ? [t, ok ? fmt(precio) : ""] : convTalla(t, tipo);
       const b = document.createElement("button"); b.type = "button"; b.disabled = !ok;
@@ -256,7 +260,7 @@
   }
   $("d-menos").onclick = () => { cant = Math.max(1, cant - 1); $("d-cant").textContent = cant; };
   $("d-mas").onclick = () => { cant++; $("d-cant").textContent = cant; };
-  const sinTalla = () => { if (actual.tallas.length && !talla) { aviso(conPres(actual) ? "👉 Primero elige la presentación" : "👟 Primero elige tu talla"); $("d-tallas").scrollIntoView({ behavior: "smooth", block: "center" }); return true; } };
+  const sinTalla = () => { if (actual.tallas.length && !talla) { aviso(conPres(actual) ? "👉 Primero elige la presentación" : esTallable(actual) ? "👟 Primero elige tu talla" : "👉 Primero elige la opción"); $("d-tallas").scrollIntoView({ behavior: "smooth", block: "center" }); return true; } };
   const conSel = () => precioSel ? { ...actual, precio: precioSel } : actual;
   $("d-agregar").onclick = () => { if (sinTalla()) return; agregar(conSel(), cant, talla); $("detalle").close(); preguntar(actual, talla); };
   const cotizar = (p, t = "") => ws(`⛰️✨ *¡Hola, ${T.nombre}!*\n\nQuiero cotizar este producto *por encargo* 👇\n🔸 *${p.nombre}*${p.cod ? ` (Ref. ${p.cod})` : ""}${t ? `\n📏 Talla: *${t}*` : ""}\n\n¿Cuál es el precio para apartarlo? 🙌`);
@@ -441,7 +445,7 @@
         id: "hot" + i, hot: true, enc: true, nombre: o.nombre, precio: num(o.precio), antes: num(o.antes), cat: o.cat || "Otros", sub: o.sub || "", cod: "",
         specs: o.specs || [], fotos: (o.fotos || []).map(toImg), video: "", peso: 1, dest: false, gar: "por defectos de fábrica", vence: Date.parse(o.vence),
         tallas: String(o.tallas || "").split(/[,;\n]+/).map(s => s.trim()).filter(Boolean).map(leerTalla)
-      })).filter(o => o.nombre && o.precio && o.vence > Date.now());
+      })).map(soloOpcionesReales).filter(o => o.nombre && o.precio && o.vence > Date.now());
       pintar();
     } catch { }
   }
