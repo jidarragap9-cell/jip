@@ -195,8 +195,8 @@
       return el;
   }
 
-  // Talla u opción: "38", "38:0" (agotada) o "8 oz=125000" (presentación con su propio precio)
-  function leerTalla(s) { const [a, n] = s.split(":").map(x => x.trim()); const [t, pr] = a.split("=").map(x => x.trim()); return { t, ok: n === undefined || num(n) > 0, precio: num(pr || 0) }; }
+  // Talla u opción: "38", "38:0" (agotada), "8 oz=125000" (presentación con su propio precio) y "#2" = su foto (la 2ª)
+  function leerTalla(s) { const f = (s.match(/#(\d+)/) || [])[1]; const [a, n] = s.replace(/#\d+/, "").split(":").map(x => x.trim()); const [t, pr] = a.split("=").map(x => x.trim()); return { t, ok: n === undefined || num(n) > 0, precio: num(pr || 0), foto: f ? Number(f) : 0 }; }
   const conPres = p => p.tallas.some(x => x.precio);
   // Talla solo en ropa y calzado. En lo demás (hogar, electrodomésticos, belleza…) solo quedan presentaciones/cantidades reales
   // ("237 ml", "paquete x2"); un número suelto como "1" no es una opción y se descarta.
@@ -223,18 +223,18 @@
   };
 
   // ---------- Detalle ----------
-  let actual = null, cant = 1, talla = "", precioSel = 0;
+  let actual = null, cant = 1, talla = "", precioSel = 0, fotoSel = "";
   function abrir(p) {
-    actual = p; cant = 1; talla = ""; precioSel = 0; $("d-cant").textContent = 1;
+    actual = p; cant = 1; talla = ""; precioSel = 0; fotoSel = ""; $("d-cant").textContent = 1;
     const tipo = tipoTalla(p);
     $("d-tallas").hidden = !p.tallas.length; $("d-tallas").innerHTML = p.tallas.length ? `<p>${conPres(p) ? "Elige la presentación" : esTallable(p) ? "Elige tu talla <small>(talla colombiana)</small>" : "Elige la opción"}</p><div class="ops"></div>${GUIA[tipo] ? `<details class="guia"><summary>📏 Guía de tallas</summary>${GUIA[tipo]}</details>` : ""}` : "";
-    p.tallas.forEach(({ t, ok, precio }) => {
+    p.tallas.forEach(({ t, ok, precio, foto }) => {
       const [co, us] = precio || !ok && conPres(p) ? [presMedida(t)[0], [presMedida(t)[1], ok ? fmt(precio) : ""].filter(Boolean).join(" · ")] : convTalla(t, tipo);
       const b = document.createElement("button"); b.type = "button"; b.disabled = !ok;
       b.innerHTML = `<b>${esc(co)}</b>${us ? `<small>${esc(us)}</small>` : ""}`;
       if (precio) b.dataset.t = t;
       b.setAttribute("aria-pressed", "false"); if (!ok) b.title = "Agotada";
-      b.onclick = () => { talla = precio ? t : us ? `${co} (${us})` : co; precioSel = precio; if (precio) $("d-precio").innerHTML = `<b>${fmt(precio)}</b>`; $("d-tallas").querySelectorAll(".ops button").forEach(x => x.setAttribute("aria-pressed", x === b)); };
+      b.onclick = () => { talla = precio ? t : us ? `${co} (${us})` : co; precioSel = precio; if (precio) $("d-precio").innerHTML = `<b>${fmt(precio)}</b>`; if (p.fotos[foto - 1]) { fotoSel = p.fotos[foto - 1]; ver({ t: "img", src: fotoSel }); } $("d-tallas").querySelectorAll(".ops button").forEach(x => x.setAttribute("aria-pressed", x === b)); };
       $("d-tallas").querySelector(".ops").append(b);
     });
     $("d-cat").textContent = p.cat; $("d-nombre").textContent = p.nombre; $("d-cod").textContent = p.cod ? `Ref. ${p.cod}` : "";
@@ -264,8 +264,8 @@
   $("d-menos").onclick = () => { cant = Math.max(1, cant - 1); $("d-cant").textContent = cant; };
   $("d-mas").onclick = () => { cant++; $("d-cant").textContent = cant; };
   const sinTalla = () => { if (actual.tallas.length && !talla) { aviso(conPres(actual) ? "👉 Primero elige la presentación" : esTallable(actual) ? "👟 Primero elige tu talla" : "👉 Primero elige la opción"); $("d-tallas").scrollIntoView({ behavior: "smooth", block: "center" }); return true; } };
-  const conSel = () => precioSel ? { ...actual, precio: precioSel } : actual;
-  $("d-agregar").onclick = () => { if (sinTalla()) return; agregar(conSel(), cant, talla); $("detalle").close(); preguntar(actual, talla); };
+  const conSel = () => ({ ...actual, precio: precioSel || actual.precio, fotos: fotoSel ? [fotoSel, ...actual.fotos.filter(f => f !== fotoSel)] : actual.fotos });
+  $("d-agregar").onclick = () => { if (sinTalla()) return; agregar(conSel(), cant, talla); $("detalle").close(); preguntar(conSel(), talla); };
   const cotizar = (p, t = "") => ws(`⛰️✨ *¡Hola, ${T.nombre}!*\n\nQuiero cotizar este producto *por encargo* 👇\n🔸 *${p.nombre}*${p.cod ? ` (Ref. ${p.cod})` : ""}${t ? `\n📏 Talla: *${t}*` : ""}\n\n¿Cuál es el precio para apartarlo? 🙌`);
   $("d-ws").onclick = () => !conPrecio(actual) ? cotizar(actual, talla) : ws(`⛰️✨ *¡Hola, ${T.nombre}!*\n\nMe interesa este producto 👇\n🔸 *${actual.nombre}*${actual.cod ? ` (Ref. ${actual.cod})` : ""}${talla ? `\n📏 ${precioSel ? "Presentación" : "Talla"}: *${talla}*` : ""}\n💰 ${fmt(conSel().precio)}\n\n¿Me dan más información? 🙌`);
 
