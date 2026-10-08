@@ -201,7 +201,7 @@
   // Talla solo en ropa y calzado. En lo demás (hogar, electrodomésticos, belleza…) solo quedan presentaciones/cantidades reales
   // ("237 ml", "paquete x2"); un número suelto como "1" no es una opción y se descarta.
   function esTallable(p) { return p.cat === "Ropa" || p.cat === "Calzado"; }
-  function soloOpcionesReales(p) { return esTallable(p) ? p : { ...p, tallas: p.tallas.filter(x => x.ok && (x.precio || /[a-záéíóúñ]/i.test(x.t))) }; }
+  function soloOpcionesReales(p) { return esTallable(p) ? p : { ...p, tallas: p.tallas.filter(x => x.ok && !/unavailable|options? from|no disponible|agotad/i.test(x.t) && (x.precio || /[a-záéíóúñ]/i.test(x.t))) }; }
   // "237 ml (8 oz) (paquete x2)" → ["237 ml (paquete x2)", "8 oz"]: los ml grandes y las onzas debajo
   function presMedida(t) { const m = String(t).match(/^(.*?)\s*\(([\d.,]+ oz)\)\s*(.*)$/i); return m ? [(m[1] + " " + m[3]).trim(), m[2]] : [t, ""]; }
   // ---------- Tallas: la hoja guarda la talla americana; se muestra la colombiana ----------
