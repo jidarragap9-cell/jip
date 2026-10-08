@@ -188,7 +188,7 @@
         ${p.hot && off ? '<span class="badge hot">🔥 Promoción</span>' : p.dest && !p.hot ? '<span class="badge">Destacado</span>' : ""}${off ? `<span class="badge off">-${off}%</span>` : ""}${p.hot ? `<span class="badge reloj">⏱ Termina en ${quedan(p.vence)}</span>` : p.enc ? '<span class="badge enc">⏳ Por encargo</span>' : '<span class="badge ya">✅ Entrega inmediata</span>'}</div>
         <div class="body"><h3>${esc(p.nombre)}</h3>
         ${p.hot ? "" : `<ul class="specs">${p.specs.slice(0, 2).map(s => `<li>${esc(s)}</li>`).join("")}</ul>`}
-        ${p.hot ? `<div class="price">${conPres(p) ? "<small>Desde</small> " : ""}<b>${fmt(p.precio)}</b>${off ? `<s>${fmt(p.antes)}</s>` : ""}</div><p class="sep">⏳ Por encargo · apártalo con <b>${fmt(anticipo(p.precio))}</b> · llega en ${E.dias} días hábiles</p>` : p.enc ? `<div class="price cot"><b>Precio a consultar</b></div><p class="sep">Apártalo con <b>${antTxt}</b> · llega en ${E.dias} días hábiles</p>` : `<div class="price"><b>${fmt(p.precio)}</b>${off ? `<s>${fmt(p.antes)}</s>` : ""}</div>`}${p.tallas.length ? `<div class="mini-tallas">${p.tallas.map(x => `<span class="${x.ok ? "" : "off"}">${convTalla(x.t, tipoTalla(p))[0]}</span>`).join("")}</div>` : ""}</div></button>
+        ${p.hot ? `<div class="price">${conPres(p) ? "<small>Desde</small> " : ""}<b>${fmt(p.precio)}</b>${off ? `<s>${fmt(p.antes)}</s>` : ""}</div><p class="sep">⏳ Por encargo · apártalo con <b>${fmt(anticipo(p.precio))}</b> · llega en ${E.dias} días hábiles</p>` : p.enc ? `<div class="price cot"><b>Precio a consultar</b></div><p class="sep">Apártalo con <b>${antTxt}</b> · llega en ${E.dias} días hábiles</p>` : `<div class="price"><b>${fmt(p.precio)}</b>${off ? `<s>${fmt(p.antes)}</s>` : ""}</div>`}${p.tallas.length ? `<div class="mini-tallas">${p.tallas.map(x => `<span class="${x.ok ? "" : "off"}">${(x.precio ? presMedida(x.t)[0] : convTalla(x.t, tipoTalla(p))[0])}</span>`).join("")}</div>` : ""}</div></button>
         <button class="buy" type="button">${p.tallas.length ? (p.hot ? "Apartar" : "Comprar") : p.hot ? "Apartar" : p.enc ? "💬 Cotizar por WhatsApp" : "Agregar al carrito"}</button>`;
       el.querySelector(".open").onclick = () => abrir(p);
       el.querySelector(".buy").onclick = e => { if (p.tallas.length) return abrir(p); if (!conPrecio(p)) return cotizar(p); agregar(p, 1); e.target.textContent = "Agregado ✓"; preguntar(p); };
@@ -201,7 +201,9 @@
   // Talla solo en ropa y calzado. En lo demás (hogar, electrodomésticos, belleza…) solo quedan presentaciones/cantidades reales
   // ("237 ml", "paquete x2"); un número suelto como "1" no es una opción y se descarta.
   function esTallable(p) { return p.cat === "Ropa" || p.cat === "Calzado"; }
-  function soloOpcionesReales(p) { return esTallable(p) ? p : { ...p, tallas: p.tallas.filter(x => x.precio || /[a-záéíóúñ]/i.test(x.t)) }; }
+  function soloOpcionesReales(p) { return esTallable(p) ? p : { ...p, tallas: p.tallas.filter(x => x.ok && (x.precio || /[a-záéíóúñ]/i.test(x.t))) }; }
+  // "237 ml (8 oz) (paquete x2)" → ["237 ml (paquete x2)", "8 oz"]: los ml grandes y las onzas debajo
+  function presMedida(t) { const m = String(t).match(/^(.*?)\s*\(([\d.,]+ oz)\)\s*(.*)$/i); return m ? [(m[1] + " " + m[3]).trim(), m[2]] : [t, ""]; }
   // ---------- Tallas: la hoja guarda la talla americana; se muestra la colombiana ----------
   const tipoTalla = p => { const s = norm(p.sub + " " + p.nombre); if (p.cat === "Calzado") return /mujer/.test(s) ? "zm" : "zh"; if (/gorra/.test(s)) return "gorra"; if (p.cat === "Ropa") return "ropa"; return ""; };
   const ZAP = { zh: 30, zm: 30 }; // talla colombiana ≈ talla US + este número
@@ -227,11 +229,12 @@
     const tipo = tipoTalla(p);
     $("d-tallas").hidden = !p.tallas.length; $("d-tallas").innerHTML = p.tallas.length ? `<p>${conPres(p) ? "Elige la presentación" : esTallable(p) ? "Elige tu talla <small>(talla colombiana)</small>" : "Elige la opción"}</p><div class="ops"></div>${GUIA[tipo] ? `<details class="guia"><summary>📏 Guía de tallas</summary>${GUIA[tipo]}</details>` : ""}` : "";
     p.tallas.forEach(({ t, ok, precio }) => {
-      const [co, us] = precio || !ok && conPres(p) ? [t, ok ? fmt(precio) : ""] : convTalla(t, tipo);
+      const [co, us] = precio || !ok && conPres(p) ? [presMedida(t)[0], [presMedida(t)[1], ok ? fmt(precio) : ""].filter(Boolean).join(" · ")] : convTalla(t, tipo);
       const b = document.createElement("button"); b.type = "button"; b.disabled = !ok;
       b.innerHTML = `<b>${esc(co)}</b>${us ? `<small>${esc(us)}</small>` : ""}`;
+      if (precio) b.dataset.t = t;
       b.setAttribute("aria-pressed", "false"); if (!ok) b.title = "Agotada";
-      b.onclick = () => { talla = precio ? co : us ? `${co} (${us})` : co; precioSel = precio; if (precio) $("d-precio").innerHTML = `<b>${fmt(precio)}</b>`; $("d-tallas").querySelectorAll(".ops button").forEach(x => x.setAttribute("aria-pressed", x === b)); };
+      b.onclick = () => { talla = precio ? t : us ? `${co} (${us})` : co; precioSel = precio; if (precio) $("d-precio").innerHTML = `<b>${fmt(precio)}</b>`; $("d-tallas").querySelectorAll(".ops button").forEach(x => x.setAttribute("aria-pressed", x === b)); };
       $("d-tallas").querySelector(".ops").append(b);
     });
     $("d-cat").textContent = p.cat; $("d-nombre").textContent = p.nombre; $("d-cod").textContent = p.cod ? `Ref. ${p.cod}` : "";
