@@ -40,7 +40,7 @@ window.TIENDA = {
   subcategorias: {
     "Tecnología": ["Cargadores", "Cables", "Audífonos", "Relojes inteligentes", "Accesorios para celular"],
     "Belleza": ["Maquillaje", "Cuidado del cabello", "Cuidado de la piel", "Perfumes", "Uñas"],
-    "Ropa": ["Polos y camisas", "Chaquetas", "Gorras", "Bolsos y billeteras", "Relojes", "Gafas"],
+    "Ropa": ["Polos y camisas", "Camisetas", "Pantalones", "Chaquetas y busos", "Gorras", "Bolsos y billeteras", "Relojes", "Gafas"],
     "Calzado": ["Tenis hombre", "Tenis mujer", "Sandalias", "Zapatos"],
     "Hogar": ["Cocina", "Decoración", "Organización", "Limpieza"]
   },
