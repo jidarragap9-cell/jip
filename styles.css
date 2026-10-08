@@ -270,3 +270,13 @@ footer .ig { display: inline-flex; align-items: center; gap: 6px; }
 .hot-row .card{scroll-snap-align:start;border-color:#e3b23c}
 .badge.hot{background:#c2410c;color:#fff}
 .badge.reloj{background:#0a0907;color:#ffe08a;top:auto;bottom:8px;left:8px;text-transform:none;letter-spacing:0}
+#listo{border:0;border-radius:16px;padding:22px 18px 18px;width:min(340px,calc(100% - 32px));text-align:center;background:#fffdf8;color:#1a1a1a}
+#listo::backdrop{background:rgba(0,0,0,.55)}
+#listo img{width:96px;height:96px;object-fit:cover;border-radius:12px;margin:0 auto 10px;display:block}
+#listo img[hidden]{display:none}
+#listo .l-ok{font-weight:800;font-size:18px;margin:0 0 4px}
+#listo #l-nombre{font-size:13px;color:#555;margin:0 0 16px}
+#listo .l-bts{display:grid;gap:8px}
+#listo button{padding:12px;border-radius:10px;font-weight:700;font-size:15px;cursor:pointer}
+#listo .l-pri{background:#e0b13a;color:#111;border:0}
+#listo .l-sec{background:transparent;border:1.5px solid #c9a24a;color:#8a6a1f}

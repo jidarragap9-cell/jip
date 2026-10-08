@@ -4,14 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>J&amp;P del Sur · Tu mundo en un solo lugar</title>
-<meta name="description" content="Tecnología, herramientas, hogar y moda al mejor precio, con envío a veredas y zonas mineras del Sur de Bolívar.">
+<meta name="description" content="Tecnología, herramientas, hogar y ropa al mejor precio, con envío a veredas y zonas mineras del Sur de Bolívar.">
 <meta name="theme-color" content="#0a0907">
 <link rel="icon" href="favicon.png" type="image/png">
 <link rel="apple-touch-icon" href="img/logo-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Outfit:wght@400;500;600;800&family=Allura&display=swap">
-<link rel="stylesheet" href="styles.css?v=202610072058">
+<link rel="stylesheet" href="styles.css?v=202610080002">
 </head>
 <body>
 
@@ -56,7 +56,7 @@
     <div class="slide on" aria-roledescription="panel" aria-label="1 de 3">
       <div>
         <h1 class="a1">Todo lo que necesitas, <span class="goldtxt">en un solo lugar</span></h1>
-        <p class="a2">Tecnología, herramientas, hogar y moda al mejor precio, con envío a veredas y zonas mineras del Sur de Bolívar.</p>
+        <p class="a2">Tecnología, herramientas, hogar y ropa al mejor precio, con envío a veredas y zonas mineras del Sur de Bolívar.</p>
         <div class="trust a3">
           <span><svg viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg>Productos originales</span>
           <span><svg viewBox="0 0 24 24"><path d="M2 7h11v9H2zM13 10h4l4 3v3h-8"/><circle cx="6" cy="17.5" r="1.5"/><circle cx="17" cy="17.5" r="1.5"/></svg>Envíos a zonas mineras</span>
@@ -147,6 +147,13 @@
 </dialog>
 
 <!-- Carrito -->
+<dialog id="listo" aria-labelledby="l-tit">
+  <img id="l-foto" alt="" hidden>
+  <p class="l-ok" id="l-tit">✨ ¡Agregado a tu carrito!</p>
+  <p id="l-nombre"></p>
+  <div class="l-bts"><button type="button" id="l-seguir" class="l-sec">Seguir comprando</button><button type="button" id="l-carrito" class="l-pri">🛒 Ir al carrito</button></div>
+</dialog>
+
 <dialog id="carrito" class="drawer" aria-labelledby="c-tit">
   <button class="cerrar" type="button" data-close aria-label="Cerrar">×</button>
   <h2 id="c-tit">Tu pedido</h2>
@@ -171,8 +178,8 @@
   </form>
 </dialog>
 
-<script src="config.js?v=202610072234"></script>
-<script src="envios.js?v=202610072058"></script>
-<script src="app.js?v=202610072058"></script>
+<script src="config.js?v=202610080002"></script>
+<script src="envios.js?v=202610080002"></script>
+<script src="app.js?v=202610080002"></script>
 </body>
 </html>

@@ -11,7 +11,7 @@
     celulares: '<rect x="7" y="2.5" width="10" height="19" rx="2"/><path d="M11 18.5h2"/>',
     herramientas: '<path d="M14.5 6.5a4 4 0 0 0 5 5L12 19a2 2 0 0 1-3-3z"/><path d="M14.5 6.5 17 4l3 3-2.5 2.5"/>',
     hogar: '<path d="M3 11 12 4l9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/>',
-    moda: '<path d="M8 3 3 6l2 4 2-1v12h10V9l2 1 2-4-5-3a4 4 0 0 1-8 0z"/>',
+    ropa: '<path d="M8 3 3 6l2 4 2-1v12h10V9l2 1 2-4-5-3a4 4 0 0 1-8 0z"/>',
     calzado: '<path d="M3 16c0-3 1-7 3-9l4 3c2 1 5 2 8 3 2 .5 3 2 3 3v2H3z"/>',
     perfumeria: '<rect x="6" y="9" width="12" height="12" rx="2"/><path d="M10 9V6h4v3M12 3v3"/>',
     electrodomesticos: '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M5 9h14M9 6h.01"/>',
@@ -190,12 +190,12 @@
         ${p.hot ? `<div class="price"><b>${fmt(p.precio)}</b>${off ? `<s>${fmt(p.antes)}</s>` : ""}</div><p class="sep">⏳ Por encargo · apártalo con <b>${fmt(anticipo(p.precio))}</b> · llega en ${E.dias} días hábiles</p>` : p.enc ? `<div class="price cot"><b>Precio a consultar</b></div><p class="sep">Apártalo con <b>${antTxt}</b> · llega en ${E.dias} días hábiles</p>` : `<div class="price"><b>${fmt(p.precio)}</b>${off ? `<s>${fmt(p.antes)}</s>` : ""}</div>`}${p.tallas.length ? `<div class="mini-tallas">${p.tallas.map(x => `<span class="${x.ok ? "" : "off"}">${convTalla(x.t, tipoTalla(p))[0]}</span>`).join("")}</div>` : ""}</div></button>
         <button class="buy" type="button">${p.tallas.length ? (p.hot ? "Apartar" : "Comprar") : p.hot ? "Apartar" : p.enc ? "💬 Cotizar por WhatsApp" : "Agregar al carrito"}</button>`;
       el.querySelector(".open").onclick = () => abrir(p);
-      el.querySelector(".buy").onclick = e => { if (p.tallas.length) return abrir(p); if (!conPrecio(p)) return cotizar(p); agregar(p, 1); e.target.textContent = "Agregado ✓"; aviso(`✨ ¡Buena elección! ${p.nombre} ya está en tu carrito`); };
+      el.querySelector(".buy").onclick = e => { if (p.tallas.length) return abrir(p); if (!conPrecio(p)) return cotizar(p); agregar(p, 1); e.target.textContent = "Agregado ✓"; preguntar(p); };
       return el;
   }
 
   // ---------- Tallas: la hoja guarda la talla americana; se muestra la colombiana ----------
-  const tipoTalla = p => { const s = norm(p.sub + " " + p.nombre); if (p.cat === "Calzado") return /mujer/.test(s) ? "zm" : "zh"; if (/gorra/.test(s)) return "gorra"; if (p.cat === "Moda") return "ropa"; return ""; };
+  const tipoTalla = p => { const s = norm(p.sub + " " + p.nombre); if (p.cat === "Calzado") return /mujer/.test(s) ? "zm" : "zh"; if (/gorra/.test(s)) return "gorra"; if (p.cat === "Ropa") return "ropa"; return ""; };
   const ZAP = { zh: 30, zm: 30 }; // talla colombiana ≈ talla US + este número
   const ROPA = { XS: "XS", S: "S", M: "M", L: "L", XL: "XL", XXL: "XXL" };
   function convTalla(t, tipo) {
@@ -253,7 +253,7 @@
   $("d-menos").onclick = () => { cant = Math.max(1, cant - 1); $("d-cant").textContent = cant; };
   $("d-mas").onclick = () => { cant++; $("d-cant").textContent = cant; };
   const sinTalla = () => { if (actual.tallas.length && !talla) { aviso("👟 Primero elige tu talla"); $("d-tallas").scrollIntoView({ behavior: "smooth", block: "center" }); return true; } };
-  $("d-agregar").onclick = () => { if (sinTalla()) return; agregar(actual, cant, talla); $("detalle").close(); abrirCarrito(); };
+  $("d-agregar").onclick = () => { if (sinTalla()) return; agregar(actual, cant, talla); $("detalle").close(); preguntar(actual, talla); };
   const cotizar = (p, t = "") => ws(`⛰️✨ *¡Hola, ${T.nombre}!*\n\nQuiero cotizar este producto *por encargo* 👇\n🔸 *${p.nombre}*${p.cod ? ` (Ref. ${p.cod})` : ""}${t ? `\n📏 Talla: *${t}*` : ""}\n\n¿Cuál es el precio para apartarlo? 🙌`);
   $("d-ws").onclick = () => !conPrecio(actual) ? cotizar(actual, talla) : ws(`⛰️✨ *¡Hola, ${T.nombre}!*\n\nMe interesa este producto 👇\n🔸 *${actual.nombre}*${actual.cod ? ` (Ref. ${actual.cod})` : ""}${talla ? `\n📏 Talla: *${talla}*` : ""}\n💰 ${fmt(actual.precio)}\n\n¿Me dan más información? 🙌`);
 
@@ -263,6 +263,14 @@
     if (it) it.cant += n; else carrito.push({ nombre: p.nombre, cod: p.cod, talla: t, precio: p.precio, peso: p.peso, foto: p.fotos[0] || "", enc: !!p.enc, vence: p.vence || 0, cant: n });
     guardar(); contador();
   }
+  function preguntar(p, t = "") {
+    $("l-nombre").textContent = p.nombre + (t ? ` · Talla ${t}` : "");
+    $("l-foto").src = p.fotos[0] || ""; $("l-foto").hidden = !p.fotos[0];
+    $("listo").showModal();
+  }
+  $("l-seguir").onclick = () => $("listo").close();
+  $("l-carrito").onclick = () => { $("listo").close(); abrirCarrito(); };
+  $("listo").addEventListener("click", e => { if (e.target === $("listo")) $("listo").close(); });
   let avisoT;
   function aviso(txt) {
     let t = $("aviso");
