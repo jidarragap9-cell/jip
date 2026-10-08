@@ -180,13 +180,14 @@
     $("hot-grid").innerHTML = ""; l.forEach(p => $("hot-grid").append(tarjeta(p)));
   }
   function tarjeta(p) {
-      const off = p.antes > p.precio ? Math.round(100 - p.precio * 100 / p.antes) : 0;
+      // descuentos de 90 % o más son un error de datos: no se muestran
+      const off0 = p.antes > p.precio ? Math.round(100 - p.precio * 100 / p.antes) : 0, off = off0 < 90 ? off0 : 0;
       const el = document.createElement("article"); el.className = "card";
       el.innerHTML = `<button class="open" type="button" aria-label="Ver ${esc(p.nombre)}">
         <div class="media">${p.fotos[0] ? `<img src="${esc(p.fotos[0])}" alt="" loading="lazy">` : '<span class="ph">J&amp;P</span>'}
         ${p.hot ? '<span class="badge hot">🔥 Oferta</span>' : p.dest ? '<span class="badge">Destacado</span>' : ""}${off ? `<span class="badge off">-${off}%</span>` : ""}${p.hot ? `<span class="badge reloj">⏱ Termina en ${quedan(p.vence)}</span>` : p.enc ? '<span class="badge enc">⏳ Por encargo</span>' : '<span class="badge ya">✅ Entrega inmediata</span>'}</div>
         <div class="body"><h3>${esc(p.nombre)}</h3>
-        <ul class="specs">${p.specs.slice(0, 2).map(s => `<li>${esc(s)}</li>`).join("")}</ul>
+        ${p.hot ? "" : `<ul class="specs">${p.specs.slice(0, 2).map(s => `<li>${esc(s)}</li>`).join("")}</ul>`}
         ${p.hot ? `<div class="price">${conPres(p) ? "<small>Desde</small> " : ""}<b>${fmt(p.precio)}</b>${off ? `<s>${fmt(p.antes)}</s>` : ""}</div><p class="sep">⏳ Por encargo · apártalo con <b>${fmt(anticipo(p.precio))}</b> · llega en ${E.dias} días hábiles</p>` : p.enc ? `<div class="price cot"><b>Precio a consultar</b></div><p class="sep">Apártalo con <b>${antTxt}</b> · llega en ${E.dias} días hábiles</p>` : `<div class="price"><b>${fmt(p.precio)}</b>${off ? `<s>${fmt(p.antes)}</s>` : ""}</div>`}${p.tallas.length ? `<div class="mini-tallas">${p.tallas.map(x => `<span class="${x.ok ? "" : "off"}">${convTalla(x.t, tipoTalla(p))[0]}</span>`).join("")}</div>` : ""}</div></button>
         <button class="buy" type="button">${p.tallas.length ? (p.hot ? "Apartar" : "Comprar") : p.hot ? "Apartar" : p.enc ? "💬 Cotizar por WhatsApp" : "Agregar al carrito"}</button>`;
       el.querySelector(".open").onclick = () => abrir(p);
@@ -230,7 +231,7 @@
       $("d-tallas").querySelector(".ops").append(b);
     });
     $("d-cat").textContent = p.cat; $("d-nombre").textContent = p.nombre; $("d-cod").textContent = p.cod ? `Ref. ${p.cod}` : "";
-    $("d-precio").innerHTML = !conPrecio(p) ? "<b>Precio a consultar</b>" : `<b>${fmt(p.precio)}</b>${p.antes > p.precio ? `<s>${fmt(p.antes)}</s>` : ""}`;
+    $("d-precio").innerHTML = !conPrecio(p) ? "<b>Precio a consultar</b>" : `<b>${fmt(p.precio)}</b>${p.antes > p.precio && p.antes < p.precio * 10 ? `<s>${fmt(p.antes)}</s>` : ""}`;
     $("d-specs").innerHTML = p.specs.map(s => `<li>${esc(s)}</li>`).join("");
     $("d-enc").hidden = !p.enc;
     if (p.hot) $("d-enc").innerHTML = `<b>🔥 Oferta por tiempo limitado · termina en ${quedan(p.vence)}</b>
