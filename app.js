@@ -18,6 +18,7 @@
     belleza: '<path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M18 15l.8 2.2L21 18l-2.2.8L18 21l-.8-2.2L15 18l2.2-.8z"/>',
     "ofertas de hoy": '<path d="M12 22c4 0 7-3 7-7 0-4-3-6-4-10-2 2-3 4-3 6-1-1-2-2-2-4-2 2-5 5-5 8 0 4 3 7 7 7z"/>',
     "por encargo": '<circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/>',
+    ninos: '<circle cx="12" cy="6" r="3"/><path d="M12 9v6M8 12h8M12 15l-3 6M12 15l3 6"/>',
     otros: '<circle cx="12" cy="12" r="9"/><path d="M8 12h.01M12 12h.01M16 12h.01"/>'
   };
   const icon = c => ICON[norm(c)] || ICON.otros;
@@ -86,7 +87,7 @@
   }
 
   // ---------- Estado ----------
-  let productos = [], ofertas = [], filtro = "Todos", subf = "", busqueda = "";
+  let productos = [], ofertas = [], filtro = "Todos", subf = "", busqueda = "", hotCat = "";
   const ENC = "Por encargo", HOT = "Ofertas de hoy", E = T.encargo || { anticipo: 0.4, dias: 20 };
   const pct = Math.round(E.anticipo * 100);
   const anticipo = v => E.anticipo < 1 ? Math.ceil(v * E.anticipo / 1000) * 1000 : Math.min(E.anticipo, v);
@@ -158,7 +159,7 @@
     categorias();
     const q = norm(busqueda);
     pintarHot(q);
-    let lista = todos().filter(p => !(filtro === "Todos" && !q && p.hot)).filter(p => enCat(p, filtro) && (!q || norm(p.nombre + " " + p.cod + " " + p.cat + " " + p.specs.join(" ")).includes(q)));
+    let lista = todos().filter(p => !(filtro === "Todos" && !q && p.hot)).filter(p => enCat(p, filtro) && (!q || norm(p.nombre + " " + p.cod + " " + p.cat + " " + p.sub + " " + p.specs.join(" ")).includes(q)));
     if (filtro === "Todos" && !q) lista = [...lista.filter(p => p.dest), ...lista.filter(p => !p.dest)];
     $("titulo").textContent = q ? `Resultados para “${busqueda}”` : filtro === "Todos" ? "Productos destacados" : subf ? `${filtro} › ${subf}` : filtro;
     const grid = $("grid"); grid.innerHTML = "";
@@ -177,7 +178,13 @@
   function pintarHot(q) {
     const l = vigentes(), ver = filtro === "Todos" && !q && l.length;
     $("hot").hidden = !ver; if (!ver) return;
-    $("hot-grid").innerHTML = ""; l.forEach(p => $("hot-grid").append(tarjeta(p)));
+    // Botones por categoría (solo si las ofertas son de varias categorías) para encontrar rápido lo que se busca
+    const cats = [...new Set(l.map(p => p.cat))];
+    if (!cats.includes(hotCat)) hotCat = "";
+    $("hot-cats").hidden = cats.length < 2;
+    $("hot-cats").innerHTML = cats.length < 2 ? "" : ["", ...cats].map(c => `<button type="button" data-c="${esc(c)}" aria-pressed="${c === hotCat}">${c ? `<svg viewBox="0 0 24 24">${icon(c)}</svg>${esc(c)} <small>${l.filter(p => p.cat === c).length}</small>` : "Todas"}</button>`).join("");
+    $("hot-cats").querySelectorAll("button").forEach(b => b.onclick = () => { hotCat = b.dataset.c; pintarHot(q); });
+    $("hot-grid").innerHTML = ""; l.filter(p => !hotCat || p.cat === hotCat).forEach(p => $("hot-grid").append(tarjeta(p)));
   }
   function tarjeta(p) {
       // descuentos de 90 % o más son un error de datos: no se muestran
@@ -186,7 +193,7 @@
       el.innerHTML = `<button class="open" type="button" aria-label="Ver ${esc(p.nombre)}">
         <div class="media">${p.fotos[0] ? `<img src="${esc(p.fotos[0])}" alt="" loading="lazy">` : '<span class="ph">J&amp;P</span>'}
         ${p.hot && off ? '<span class="badge hot">🔥 Promoción</span>' : p.dest && !p.hot ? '<span class="badge">Destacado</span>' : ""}${off ? `<span class="badge off">-${off}%</span>` : ""}${p.hot ? `<span class="badge reloj">⏱ Termina en ${quedan(p.vence)}</span>` : p.enc ? '<span class="badge enc">⏳ Por encargo</span>' : '<span class="badge ya">✅ Entrega inmediata</span>'}</div>
-        <div class="body"><h3>${esc(p.nombre)}</h3>
+        <div class="body"><span class="cat-tag">${esc(p.sub ? `${p.cat} · ${p.sub}` : p.cat)}</span><h3>${esc(p.nombre)}</h3>
         ${p.hot ? "" : `<ul class="specs">${p.specs.slice(0, 2).map(s => `<li>${esc(s)}</li>`).join("")}</ul>`}
         ${p.hot ? `<div class="price">${conPres(p) ? "<small>Desde</small> " : ""}<b>${fmt(p.precio)}</b>${off ? `<s>${fmt(p.antes)}</s>` : ""}</div><p class="sep">⏳ Por encargo · apártalo con <b>${fmt(anticipo(p.precio))}</b> · llega en ${E.dias} días hábiles</p>` : p.enc ? `<div class="price cot"><b>Precio a consultar</b></div><p class="sep">Apártalo con <b>${antTxt}</b> · llega en ${E.dias} días hábiles</p>` : `<div class="price"><b>${fmt(p.precio)}</b>${off ? `<s>${fmt(p.antes)}</s>` : ""}</div>`}${p.tallas.length ? `<div class="mini-tallas">${p.tallas.map(x => `<span class="${x.ok ? "" : "off"}">${(x.precio ? presMedida(x.t)[0] : convTalla(x.t, tipoTalla(p))[0])}</span>`).join("")}</div>` : ""}</div></button>
         <button class="buy" type="button">${p.tallas.length ? (p.hot ? "Apartar" : "Comprar") : p.hot ? "Apartar" : p.enc ? "💬 Cotizar por WhatsApp" : "Agregar al carrito"}</button>`;
@@ -200,24 +207,39 @@
   const conPres = p => p.tallas.some(x => x.precio);
   // Talla solo en ropa y calzado. En lo demás (hogar, electrodomésticos, belleza…) solo quedan presentaciones/cantidades reales
   // ("237 ml", "paquete x2"); un número suelto como "1" no es una opción y se descarta.
-  function esTallable(p) { return p.cat === "Ropa" || p.cat === "Calzado"; }
+  function esTallable(p) { return p.cat === "Ropa" || p.cat === "Calzado" || p.cat === "Niños"; }
   function soloOpcionesReales(p) { return esTallable(p) ? p : { ...p, tallas: p.tallas.filter(x => x.ok && !/unavailable|options? from|no disponible|agotad/i.test(x.t) && (x.precio || /[a-záéíóúñ]/i.test(x.t))) }; }
   // "237 ml (8 oz) (paquete x2)" → ["237 ml (paquete x2)", "8 oz"]: los ml grandes y las onzas debajo
   function presMedida(t) { const m = String(t).match(/^(.*?)\s*\(([\d.,]+ oz)\)\s*(.*)$/i); return m ? [(m[1] + " " + m[3]).trim(), m[2]] : [t, ""]; }
   // ---------- Tallas: la hoja guarda la talla americana; se muestra la colombiana ----------
-  const tipoTalla = p => { const s = norm(p.sub + " " + p.nombre); if (p.cat === "Calzado") return /mujer/.test(s) ? "zm" : "zh"; if (/gorra/.test(s)) return "gorra"; if (p.cat === "Ropa") return "ropa"; return ""; };
-  const ZAP = { zh: 30, zm: 30 }; // talla colombiana ≈ talla US + este número
-  const ROPA = { XS: "XS", S: "S", M: "M", L: "L", XL: "XL", XXL: "XXL" };
+  // Calzado: todo se convierte desde el LARGO DEL PIE (cm). Hombre: COL = US + 30 (regla de la tienda) ⇒ COL = cm + 12.
+  // Mujer: US + 17 = cm. Niños: C (bebé/pequeño) US + 6 = cm; Y (grande) según tabla. Niños < 22 cm usan la escala infantil (1,5 × cm + 1).
+  const esNino = p => p.cat === "Niños" || /\b(nin[oa]s?|kids?|boys?|girls?|toddler|infant|bebe|youth|juvenil|little kid|big kid)\b/.test(norm(p.sub + " " + p.nombre));
+  const tipoTalla = p => { const s = norm(p.sub + " " + p.nombre); if (p.cat === "Calzado" || p.cat === "Niños" && /calzado|zapat|tenis|shoe|sneaker|sandal|bota/.test(s)) return esNino(p) ? "zn" : /mujer|women|dama/.test(s) ? "zm" : "zh"; if (/gorra/.test(s)) return "gorra"; if (p.cat === "Ropa" || p.cat === "Niños") return "ropa"; return ""; };
+  const Y_CM = { 1: 20, 1.5: 20.5, 2: 21, 2.5: 21.5, 3: 22, 3.5: 22.5, 4: 23, 4.5: 23.5, 5: 23.5, 5.5: 24, 6: 24, 6.5: 24.5, 7: 25 };
+  // Largo del pie en cm a partir de la talla US
+  function piCm(t, tipo) {
+    const s = String(t).toUpperCase().replace(",", "."), n = parseFloat(s); if (isNaN(n)) return 0;
+    if (tipo === "zh") return n + 18;
+    if (tipo === "zm") return n + 17;
+    // niños: "10C" / "10 Toddler" / "10 Little Kid" = C; "3Y" / "3 Big Kid" = Y; sin letra: 8 o más = C, menos = Y
+    const c = /C\b|TODDLER|LITTLE|INFANT|BEBE/.test(s) || !/Y\b|BIG|YOUTH/.test(s) && n >= 8;
+    return c ? n + 6 : Y_CM[n] || n + 19;
+  }
+  const colDe = cm => cm < 22 ? Math.round(1.5 * cm + 1) : Math.round((cm + 12) * 2) / 2; // niños: tallas enteras
+  const coma = n => String(n).replace(".", ",");
   function convTalla(t, tipo) {
-    const n = parseFloat(String(t).replace(",", "."));
-    if (ZAP[tipo] && !isNaN(n)) return [String(n + ZAP[tipo]).replace(".", ","), `US ${String(n).replace(".", ",")}`];
-    if (tipo === "ropa" && ROPA[t.toUpperCase()]) return [t.toUpperCase(), `US ${t.toUpperCase()}`];
+    if (/^z[hmn]$/.test(tipo)) { const cm = piCm(t, tipo); if (cm) return [coma(colDe(cm)), `US ${coma(String(t).replace(/\s*(toddler|little kid|big kid|youth)\s*/i, s => /big|youth/i.test(s) ? "Y" : "C").replace(/\s+/g, ""))} · ${coma(cm)} cm`]; }
+    if (tipo === "ropa" && ROPA[String(t).toUpperCase()]) return [String(t).toUpperCase(), `US ${String(t).toUpperCase()}`];
     return [t, ""];
   }
+  const ROPA = { XS: "XS", S: "S", M: "M", L: "L", XL: "XL", XXL: "XXL" };
   const tabla = (h, f) => `<table><tr>${h.map(x => `<th>${x}</th>`).join("")}</tr>${f.map(r => `<tr>${r.map(x => `<td>${x}</td>`).join("")}</tr>`).join("")}</table>`;
+  const guiaPie = (tipo, us) => tabla(["Largo del pie", "Talla Colombia", "US"], us.map(u => { const cm = piCm(u, tipo); return [`${coma(cm)} cm`, `<b>${coma(colDe(cm))}</b>`, coma(u)]; })) + "<p><b>Mide el pie:</b> párate sobre una hoja, marca el talón y la punta del dedo más largo y mide en cm. Busca ese largo en la tabla. Si quedas entre dos, elige la más grande" + (tipo === "zn" ? " (a los niños déjales 1 cm extra para que crezcan)." : ".") + "</p>";
   const GUIA = {
-    zh: tabla(["Colombia", "US", "Largo del pie"], [["37", "7", "25 cm"], ["38", "8", "26 cm"], ["39", "9", "27 cm"], ["39,5", "9,5", "27,5 cm"], ["40", "10", "28 cm"], ["41", "11", "29 cm"], ["42", "12", "30 cm"]]) + "<p>Mide tu pie del talón a la punta del dedo más largo. Si quedas entre dos tallas, elige la más grande.</p>",
-    zm: tabla(["Colombia", "US", "Largo del pie"], [["35", "5", "22 cm"], ["36", "6", "23 cm"], ["37", "7", "24 cm"], ["38", "8", "25 cm"], ["38,5", "8,5", "25,5 cm"], ["39", "9", "26 cm"], ["40", "10", "27 cm"]]) + "<p>Mide tu pie del talón a la punta del dedo más largo. Si quedas entre dos tallas, elige la más grande.</p>",
+    zh: guiaPie("zh", [6, 7, 7.5, 8, 8.5, 9, 9.5, 10, 11, 12]),
+    zm: guiaPie("zm", [5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9, 10]),
+    zn: guiaPie("zn", ["4C", "5C", "6C", "7C", "8C", "9C", "10C", "11C", "12C", "13C", "1Y", "2Y", "3Y", "4Y", "5Y", "6Y", "7Y"]),
     ropa: tabla(["Talla", "Pecho", "Cintura"], [["S", "86 a 94 cm", "71 a 79 cm"], ["M", "94 a 102 cm", "79 a 87 cm"], ["L", "102 a 110 cm", "87 a 95 cm"], ["XL", "110 a 118 cm", "95 a 103 cm"], ["XXL", "118 a 126 cm", "103 a 111 cm"]]) + "<p>Las tallas americanas suelen ser un poco más amplias. Si dudas, escríbenos por WhatsApp y te ayudamos.</p>",
     gorra: "<p>Talla única con correa ajustable: le queda a la mayoría de adultos (54 a 60 cm de contorno de cabeza).</p>"
   };
