@@ -195,7 +195,7 @@
         ${p.hot && off ? '<span class="badge hot">🔥 Promoción</span>' : p.dest && !p.hot ? '<span class="badge">Destacado</span>' : ""}${off ? `<span class="badge off">-${off}%</span>` : ""}${p.hot ? `<span class="badge reloj">⏱ Termina en ${quedan(p.vence)}</span>` : p.enc ? '<span class="badge enc">⏳ Por encargo</span>' : '<span class="badge ya">✅ Entrega inmediata</span>'}</div>
         <div class="body"><span class="cat-tag">${esc(p.sub ? `${p.cat} · ${p.sub}` : p.cat)}</span><h3>${esc(p.nombre)}</h3>
         ${p.hot ? "" : `<ul class="specs">${p.specs.slice(0, 2).map(s => `<li>${esc(s)}</li>`).join("")}</ul>`}
-        ${p.hot ? `<div class="price">${conPres(p) ? "<small>Desde</small> " : ""}<b>${fmt(p.precio)}</b>${off ? `<s>${fmt(p.antes)}</s>` : ""}</div><p class="sep">⏳ Por encargo · apártalo con <b>${fmt(anticipo(p.precio))}</b> · llega en ${E.dias} días hábiles</p>` : p.enc ? `<div class="price cot"><b>Precio a consultar</b></div><p class="sep">Apártalo con <b>${antTxt}</b> · llega en ${E.dias} días hábiles</p>` : `<div class="price"><b>${fmt(p.precio)}</b>${off ? `<s>${fmt(p.antes)}</s>` : ""}</div>`}${p.tallas.length ? `<div class="mini-tallas">${p.tallas.map(x => `<span class="${x.ok ? "" : "off"}">${(x.precio ? presMedida(x.t)[0] : convTalla(x.t, tipoTalla(p))[0])}</span>`).join("")}</div>` : ""}</div></button>
+        ${p.hot ? `<div class="price">${desde(p) ? "<small>Desde</small> " : ""}<b>${fmt(p.precio)}</b>${off ? `<s>${fmt(p.antes)}</s>` : ""}</div><p class="sep">⏳ Por encargo · apártalo con <b>${fmt(anticipo(p.precio))}</b> · llega en ${E.dias} días hábiles</p>` : p.enc ? `<div class="price cot"><b>Precio a consultar</b></div><p class="sep">Apártalo con <b>${antTxt}</b> · llega en ${E.dias} días hábiles</p>` : `<div class="price"><b>${fmt(p.precio)}</b>${off ? `<s>${fmt(p.antes)}</s>` : ""}</div>`}${p.tallas.length ? `<div class="mini-tallas">${p.tallas.map(x => `<span class="${x.ok ? "" : "off"}">${(conPres(p) ? presMedida(x.t)[0] : convTalla(x.t, tipoTalla(p))[0])}</span>`).join("")}</div>` : ""}</div></button>
         <button class="buy" type="button">${p.tallas.length ? (p.hot ? "Apartar" : "Comprar") : p.hot ? "Apartar" : p.enc ? "💬 Cotizar por WhatsApp" : "Agregar al carrito"}</button>`;
       el.querySelector(".open").onclick = () => abrir(p);
       el.querySelector(".buy").onclick = e => { if (p.tallas.length) return abrir(p); if (!conPrecio(p)) return cotizar(p); agregar(p, 1); e.target.textContent = "Agregado ✓"; preguntar(p); };
@@ -204,7 +204,9 @@
 
   // Talla u opción: "38", "38:0" (agotada), "8 oz=125000" (presentación con su propio precio) y "#2" = su foto (la 2ª)
   function leerTalla(s) { const f = (s.match(/#(\d+)/) || [])[1]; const [a, n] = s.replace(/#\d+/, "").split(":").map(x => x.trim()); const [t, pr] = a.split("=").map(x => x.trim()); return { t, ok: n === undefined || num(n) > 0, precio: num(pr || 0), foto: f ? Number(f) : 0 }; }
-  const conPres = p => p.tallas.some(x => x.precio);
+  // Precio propio por opción: en ropa/calzado es la TALLA (sigue mostrándose la talla colombiana); en lo demás, la presentación
+  const conPres = p => p.tallas.some(x => x.precio) && !esTallable(p);
+  const desde = p => conPres(p) || new Set(p.tallas.filter(x => x.ok && x.precio).map(x => x.precio)).size > 1;
   // Talla solo en ropa y calzado. En lo demás (hogar, electrodomésticos, belleza…) solo quedan presentaciones/cantidades reales
   // ("237 ml", "paquete x2"); un número suelto como "1" no es una opción y se descarta.
   function esTallable(p) { return p.cat === "Ropa" || p.cat === "Calzado" || p.cat === "Niños"; }
@@ -251,16 +253,16 @@
     const tipo = tipoTalla(p);
     $("d-tallas").hidden = !p.tallas.length; $("d-tallas").innerHTML = p.tallas.length ? `<p>${conPres(p) ? "Elige la presentación" : esTallable(p) ? "Elige tu talla <small>(talla colombiana)</small>" : "Elige la opción"}</p><div class="ops"></div>${GUIA[tipo] ? `<details class="guia"><summary>📏 Guía de tallas</summary>${GUIA[tipo]}</details>` : ""}` : "";
     p.tallas.forEach(({ t, ok, precio, foto }) => {
-      const [co, us] = precio || !ok && conPres(p) ? [presMedida(t)[0], [presMedida(t)[1], ok ? fmt(precio) : ""].filter(Boolean).join(" · ")] : convTalla(t, tipo);
+      const pr = conPres(p), [co, us0] = pr ? presMedida(t) : convTalla(t, tipo), us = [us0, ok && precio ? fmt(precio) : ""].filter(Boolean).join(" · ");
       const b = document.createElement("button"); b.type = "button"; b.disabled = !ok;
       b.innerHTML = `<b>${esc(co)}</b>${us ? `<small>${esc(us)}</small>` : ""}`;
-      if (precio) b.dataset.t = t;
+      if (pr) b.dataset.t = t;
       b.setAttribute("aria-pressed", "false"); if (!ok) b.title = "Agotada";
-      b.onclick = () => { talla = precio ? t : us ? `${co} (${us})` : co; precioSel = precio; if (precio) $("d-precio").innerHTML = `<b>${fmt(precio)}</b>`; if (p.fotos[foto - 1]) { fotoSel = p.fotos[foto - 1]; ver({ t: "img", src: fotoSel }); } $("d-tallas").querySelectorAll(".ops button").forEach(x => x.setAttribute("aria-pressed", x === b)); };
+      b.onclick = () => { talla = pr ? t : us0 ? `${co} (${us0})` : co; precioSel = precio; if (precio) $("d-precio").innerHTML = `<b>${fmt(precio)}</b>`; if (p.fotos[foto - 1]) { fotoSel = p.fotos[foto - 1]; ver({ t: "img", src: fotoSel }); } $("d-tallas").querySelectorAll(".ops button").forEach(x => x.setAttribute("aria-pressed", x === b)); };
       $("d-tallas").querySelector(".ops").append(b);
     });
     $("d-cat").textContent = p.cat; $("d-nombre").textContent = p.nombre; $("d-cod").textContent = p.cod ? `Ref. ${p.cod}` : "";
-    $("d-precio").innerHTML = !conPrecio(p) ? "<b>Precio a consultar</b>" : `<b>${fmt(p.precio)}</b>${p.antes > p.precio && p.antes < p.precio * 10 ? `<s>${fmt(p.antes)}</s>` : ""}`;
+    $("d-precio").innerHTML = !conPrecio(p) ? "<b>Precio a consultar</b>" : `${desde(p) ? "<small>Desde</small> " : ""}<b>${fmt(p.precio)}</b>${p.antes > p.precio && p.antes < p.precio * 10 ? `<s>${fmt(p.antes)}</s>` : ""}`;
     $("d-specs").innerHTML = p.specs.map(s => `<li>${esc(s)}</li>`).join("");
     $("d-enc").hidden = !p.enc;
     if (p.hot) $("d-enc").innerHTML = `<b>${p.antes > p.precio ? "🔥 Promoción" : "⏱ Precio"} por tiempo limitado · termina en ${quedan(p.vence)}</b>
@@ -289,7 +291,7 @@
   const conSel = () => ({ ...actual, precio: precioSel || actual.precio, fotos: fotoSel ? [fotoSel, ...actual.fotos.filter(f => f !== fotoSel)] : actual.fotos });
   $("d-agregar").onclick = () => { if (sinTalla()) return; agregar(conSel(), cant, talla); $("detalle").close(); preguntar(conSel(), talla); };
   const cotizar = (p, t = "") => ws(`⛰️✨ *¡Hola, ${T.nombre}!*\n\nQuiero cotizar este producto *por encargo* 👇\n🔸 *${p.nombre}*${p.cod ? ` (Ref. ${p.cod})` : ""}${t ? `\n📏 Talla: *${t}*` : ""}\n\n¿Cuál es el precio para apartarlo? 🙌`);
-  $("d-ws").onclick = () => !conPrecio(actual) ? cotizar(actual, talla) : ws(`⛰️✨ *¡Hola, ${T.nombre}!*\n\nMe interesa este producto 👇\n🔸 *${actual.nombre}*${actual.cod ? ` (Ref. ${actual.cod})` : ""}${talla ? `\n📏 ${precioSel ? "Presentación" : "Talla"}: *${talla}*` : ""}\n💰 ${fmt(conSel().precio)}\n\n¿Me dan más información? 🙌`);
+  $("d-ws").onclick = () => !conPrecio(actual) ? cotizar(actual, talla) : ws(`⛰️✨ *¡Hola, ${T.nombre}!*\n\nMe interesa este producto 👇\n🔸 *${actual.nombre}*${actual.cod ? ` (Ref. ${actual.cod})` : ""}${talla ? `\n📏 ${conPres(actual) ? "Presentación" : "Talla"}: *${talla}*` : ""}\n💰 ${fmt(conSel().precio)}\n\n¿Me dan más información? 🙌`);
 
   // ---------- Carrito ----------
   function agregar(p, n, t = "") {
