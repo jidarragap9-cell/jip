@@ -1,32 +1,78 @@
-/* Minero de la portada: camina con su carrito hacia la Teta de San Lucas */
+/* Portada: panel del Sur de Bolívar y escena del minero rumbo a la Teta de San Lucas */
+.sur .fauna{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.sur .fauna span{padding:6px 12px;border:1px solid rgba(227,178,60,.5);border-radius:999px;font:600 13px/1 var(--f-body);color:#f4e6c4;background:rgba(0,0,0,.25)}
+.postal{justify-self:center;margin:0;width:min(400px,100%);border-radius:18px;overflow:hidden;box-shadow:0 0 0 2px var(--gold),0 24px 60px rgba(0,0,0,.55);background:#0d1710}
+.postal svg,.postal img{display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:cover}
+.postal figcaption{padding:9px 12px;font:600 12px/1.2 var(--f-body);letter-spacing:.05em;color:var(--gold);text-align:center}
+
 .mina{position:relative;height:150px;margin-top:-10px}
+.mina button{padding:0;border:0;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.mina button:focus-visible{outline:2px solid var(--gold);outline-offset:4px;border-radius:8px}
+.mina svg{display:block;width:100%;height:auto;overflow:visible}
 .mina .riel{position:absolute;left:0;right:0;bottom:8px;height:8px;border-top:2px solid #8a7a5c;border-bottom:2px solid #8a7a5c;background:repeating-linear-gradient(90deg,#5a4630 0 6px,transparent 6px 22px)}
 .mina .pico{position:absolute;right:8px;bottom:12px;width:230px;text-align:center}
-.mina .pico svg{display:block;width:100%;height:auto;overflow:visible}
 .mina .pico span{position:absolute;left:0;right:0;top:-26px;font:700 12px/1 var(--f-body);letter-spacing:.06em;text-transform:uppercase;color:var(--gold)}
-.minero{position:absolute;bottom:10px;left:2%;width:150px;height:100px;padding:0;border:0;background:none;cursor:pointer;animation:camina 30s linear infinite;-webkit-tap-highlight-color:transparent;z-index:2}
-.minero svg{display:block;width:100%;height:100%;overflow:visible}
+.mina .arbol{position:absolute;left:28%;bottom:14px;width:140px;pointer-events:none}
+.mina .animal{position:absolute;z-index:1}
+.mina .mono{left:calc(28% + 77px);bottom:22px;width:56px;transform-origin:50% 0;animation:mece 3.2s ease-in-out infinite alternate}
+.mina .paujil{left:58%;bottom:14px;width:44px;animation:pasea 14s ease-in-out infinite}
+.mina .jaguar{right:236px;bottom:10px;width:124px}
+.mina .jaguar .cola{transform-origin:26px 40px;animation:cola 2.4s ease-in-out infinite alternate}
+.mina .jaguar .cabeza{transform-origin:96px 40px;transition:transform .3s}
+.mina .jaguar.activo .cabeza{transform:rotate(-14deg) translateY(-3px)}
+.mina .mono.activo{animation:balanceo .5s ease-in-out 4 alternate}
+.mina .paujil.activo svg{animation:salto .35s ease-out 3}
+.mina .pico.activo svg{filter:drop-shadow(0 0 10px rgba(242,196,107,.8))}
+@keyframes mece{from{transform:rotate(-5deg)}to{transform:rotate(5deg)}}
+@keyframes balanceo{from{transform:rotate(-24deg)}to{transform:rotate(24deg)}}
+@keyframes pasea{0%,100%{transform:translateX(0) scaleX(1)}45%{transform:translateX(60px) scaleX(1)}50%{transform:translateX(60px) scaleX(-1)}95%{transform:translateX(0) scaleX(-1)}}
+@keyframes salto{50%{transform:translateY(-12px)}}
+@keyframes cola{from{transform:rotate(-8deg)}to{transform:rotate(14deg)}}
+
+.minero{position:absolute;bottom:10px;left:2%;width:150px;height:100px;animation:camina 34s linear infinite;z-index:3}
+.minero svg{height:100%}
 .minero .piernas path{stroke:#2f4a6b;stroke-width:4.5;stroke-linecap:round;transform-origin:39px 52px}
 .minero .p1{animation:paso .6s ease-in-out infinite alternate}
 .minero .p2{animation:paso .6s ease-in-out infinite alternate-reverse}
 .minero .rueda{animation:gira 1s linear infinite}
-.minero .pica{transform:rotate(0)}
+.minero .lampara{filter:drop-shadow(0 0 4px #fff6c0)}
 @keyframes camina{0%{left:2%;opacity:0}3%{opacity:1}92%{opacity:1}97%,100%{left:calc(100% - 250px);opacity:0}}
 @keyframes paso{from{transform:rotate(-14deg)}to{transform:rotate(14deg)}}
 @keyframes gira{to{transform:rotate(360deg)}}
 .mina.pausa .minero,.mina.pausa .minero .p1,.mina.pausa .minero .p2,.mina.pausa .minero .rueda{animation-play-state:paused}
-.minero.golpe .pica{animation:golpe .38s ease-in 3}
-@keyframes golpe{0%{transform:rotate(0)}45%{transform:rotate(-35deg)}100%{transform:rotate(95deg)}}
-.minero:focus-visible{outline:2px solid var(--gold);outline-offset:4px;border-radius:8px}
-.dato{position:absolute;bottom:104px;left:0;width:min(250px,70vw);padding:9px 11px;border-radius:12px;background:#fffdf8;color:#1a1a1a;font:600 12px/1.35 var(--f-body);text-align:left;box-shadow:0 8px 24px rgba(0,0,0,.45);opacity:0;transform:translateY(6px);transition:opacity .3s,transform .3s;pointer-events:none}
-.dato::after{content:"";position:absolute;left:30px;bottom:-6px;border:6px solid transparent;border-bottom:0;border-top-color:#fffdf8}
+.minero.golpe .pica{animation:golpe .36s ease-in 3}
+@keyframes golpe{0%{transform:rotate(0)}40%{transform:rotate(-40deg)}100%{transform:rotate(100deg)}}
+.chispa,.pepita{position:absolute;pointer-events:none;z-index:4}
+.chispa{width:6px;height:6px;border-radius:50%;background:#ffe08a;box-shadow:0 0 8px #ffd257;animation:chispa .5s ease-out forwards}
+@keyframes chispa{to{transform:translate(var(--dx),var(--dy));opacity:0}}
+.pepita{width:11px;height:9px;border-radius:45% 55% 50% 40%;background:radial-gradient(circle at 35% 35%,#fff3b0,#e3b23c 60%,#a87918);animation:arco .7s cubic-bezier(.3,.6,.4,1) forwards}
+@keyframes arco{0%{transform:translate(0,0)}50%{transform:translate(calc(var(--dx)/2),-46px)}100%{transform:translate(var(--dx),-6px) scale(.7);opacity:.2}}
+
+.oro{position:absolute;left:12px;top:6px;padding:5px 11px;border-radius:999px;background:rgba(0,0,0,.55);border:1px solid var(--gold);color:#f4e6c4;font:600 12px/1 var(--f-body);z-index:4}
+.oro b{color:var(--gold);font-size:14px}
+.oro.pop{animation:pop .35s ease-out}
+@keyframes pop{50%{transform:scale(1.18)}}
+.dato{position:absolute;bottom:120px;left:0;width:min(270px,74vw);padding:10px 12px;border-radius:12px;background:#fffdf8;color:#1a1a1a;font:600 12.5px/1.4 var(--f-body);text-align:left;box-shadow:0 10px 28px rgba(0,0,0,.5);opacity:0;transform:translateY(6px);transition:opacity .3s,transform .3s;pointer-events:none;z-index:5}
+.dato::after{content:"";position:absolute;left:var(--px,30px);bottom:-6px;border:6px solid transparent;border-bottom:0;border-top-color:#fffdf8}
 .dato.on{opacity:1;transform:none}
 .dato b{color:#8a6a1f}
-.pepita{position:absolute;left:18px;top:4px;font-size:16px;pointer-events:none;animation:pepita 1.1s ease-out forwards}
-@keyframes pepita{from{transform:translate(0,0) scale(.6);opacity:1}to{transform:translate(-14px,-46px) scale(1.2);opacity:0}}
-.birds{position:absolute;top:0;left:-60px;animation:vuelo 22s linear infinite}
+.dato small{display:block;margin-top:4px;color:#8a6a1f;font-weight:700}
+.confeti{position:absolute;top:-10px;width:7px;height:11px;z-index:5;pointer-events:none;animation:cae 1.6s ease-in both}
+@keyframes cae{to{transform:translate(var(--dx),170px) rotate(540deg);opacity:0}}
+.birds{position:absolute;top:0;left:-60px;animation:vuelo 22s linear infinite;pointer-events:none}
 .birds i{position:absolute;width:12px;height:6px;border-top:2px solid #b3aa98;border-radius:50% 50% 0 0/100% 100% 0 0}
 .birds i:nth-child(1){left:0;top:6px}.birds i:nth-child(2){left:16px;top:0}.birds i:nth-child(3){left:30px;top:9px}
 @keyframes vuelo{to{transform:translateX(calc(100vw + 120px))}}
-@media (max-width:600px){.mina{height:120px}.mina .pico{width:160px}.mina .pico span{font-size:10.5px;top:-20px}.minero{width:114px;height:76px}.dato{bottom:80px}@keyframes camina{0%{left:2%;opacity:0}3%{opacity:1}92%{opacity:1}97%,100%{left:calc(100% - 175px);opacity:0}}}
-@media (prefers-reduced-motion:reduce){.minero{animation:none;left:auto;right:240px}.minero .p1,.minero .p2,.minero .rueda,.birds{animation:none}.birds{display:none}}
+@media (max-width:600px){
+  .mina{height:122px}
+  .mina .pico{width:150px}.mina .pico span{font-size:10.5px;top:-20px}
+  .mina .arbol{left:-6px;width:100px}
+  .mina .mono{left:63px;bottom:28px;width:34px}
+  .mina .paujil{display:none}
+  .postal{width:min(270px,80vw)}
+  .mina .jaguar{right:150px;width:88px}
+  .minero{width:114px;height:76px}
+  .dato{bottom:96px}
+  @keyframes camina{0%{left:2%;opacity:0}3%{opacity:1}92%{opacity:1}97%,100%{left:calc(100% - 172px);opacity:0}}
+}
+@media (prefers-reduced-motion:reduce){.minero{animation:none;left:40%}.minero .p1,.minero .p2,.minero .rueda,.mina .mono,.mina .paujil,.mina .jaguar .cola{animation:none}.birds{display:none}}

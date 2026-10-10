@@ -451,9 +451,9 @@
     play();
   })();
   const B = T.breb || {};
-  if (B.llave) $("llave").textContent = B.llave;
-  if (B.qr) $("qr").innerHTML = `<img src="${esc(B.qr)}" alt="Código QR Bre-B de J&amp;P del Sur">`;
-  T.pagos.forEach(p => { $("c-pago").add(new Option(p)); $("pagos").insertAdjacentHTML("beforeend", `<span class="chip">${esc(p)}</span>`); });
+  if (B.llave && $("llave")) $("llave").textContent = B.llave;
+  if (B.qr && $("qr")) $("qr").innerHTML = `<img src="${esc(B.qr)}" alt="Código QR Bre-B de J&amp;P del Sur">`;
+  T.pagos.forEach(p => { $("c-pago").add(new Option(p)); $("pagos")?.insertAdjacentHTML("beforeend", `<span class="chip">${esc(p)}</span>`); });
   $("anio").textContent = `© ${new Date().getFullYear()} ${T.nombre}`;
   $("abrirCarrito").onclick = abrirCarrito;
   document.querySelectorAll("[data-close]").forEach(b => b.onclick = () => b.closest("dialog").close());
