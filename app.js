@@ -47,7 +47,7 @@
 
   // Enlaces de Google Drive → imagen o video que se puede mostrar
   const driveId = u => (u.match(/[?&]id=([\w-]+)/) || u.match(/\/d\/([\w-]+)/) || [])[1];
-  const toImg = u => { const id = /drive\.google\.com/.test(u) && driveId(u); return id ? `https://lh3.googleusercontent.com/d/${id}=w1000` : u; };
+  const toImg = u => { const id = /drive\.google\.com/.test(u) && driveId(u); return id ? `https://lh3.googleusercontent.com/d/${id}=w1600` : u; };
   function toVideo(u) {
     if (!u) return "";
     const yt = u.match(/(?:youtu\.be\/|v=|shorts\/)([\w-]{11})/);
@@ -275,15 +275,22 @@
     $("d-agregar").style.display = conPrecio(p) ? "" : "none"; $("d-agregar").textContent = p.hot ? "Apartar" : "Agregar al carrito"; $("d-menos").parentElement.style.display = conPrecio(p) ? "" : "none";
     $("d-ws").textContent = conPrecio(p) ? "Preguntar por WhatsApp" : "💬 Cotizar por WhatsApp";
     const medios = [...p.fotos.map(src => ({ t: "img", src })), ...(p.video ? [{ t: "vid", src: p.video }] : [])];
-    const ver = m => { $("d-main").innerHTML = !m ? '<span class="ph">J&amp;P</span>' : m.t === "img" ? `<img src="${esc(m.src)}" alt="${esc(p.nombre)}">` : `<iframe src="${esc(m.src)}" allow="autoplay; encrypted-media" allowfullscreen title="Video"></iframe>`; };
-    ver(medios[0]);
+    // Galería deslizable: se pasa con el dedo (o con las flechas ‹ ›) de foto en foto
+    $("d-main").innerHTML = !medios.length ? '<span class="ph">J&amp;P</span>' : `<div class="gal-track">${medios.map(m => `<div class="gal-sl">${m.t === "img" ? `<img src="${esc(m.src)}" alt="${esc(p.nombre)}" loading="lazy">` : `<iframe src="${esc(m.src)}" allow="autoplay; encrypted-media" allowfullscreen title="Video"></iframe>`}</div>`).join("")}</div>${medios.length > 1 ? `<button type="button" class="gal-ar prev" aria-label="Foto anterior">‹</button><button type="button" class="gal-ar next" aria-label="Foto siguiente">›</button><div class="gal-dots">${medios.map(() => "<i></i>").join("")}</div>` : ""}`;
+    const track = $("d-main").querySelector(".gal-track");
+    const idx = () => track ? Math.round(track.scrollLeft / (track.clientWidth || 1)) : 0;
+    const ir = (i, suave = true) => { if (!track) return; i = (i + medios.length) % medios.length; track.scrollTo({ left: i * track.clientWidth, behavior: suave ? "smooth" : "auto" }); };
+    const marcar = () => { const i = idx(); $("d-main").querySelectorAll(".gal-dots i").forEach((d, k) => d.classList.toggle("on", k === i)); $("d-th").querySelectorAll("button").forEach((b, k) => b.setAttribute("aria-current", k === i)); };
+    const ver = m => { const i = m ? medios.findIndex(x => x.src === m.src) : -1; if (i >= 0) ir(i); };
+    if (track) { track.onscroll = () => requestAnimationFrame(marcar); $("d-main").querySelector(".prev")?.addEventListener("click", () => ir(idx() - 1)); $("d-main").querySelector(".next")?.addEventListener("click", () => ir(idx() + 1)); }
     $("d-th").innerHTML = "";
-    if (medios.length > 1) medios.forEach(m => {
+    if (medios.length > 1) medios.forEach((m, k) => {
       const b = document.createElement("button"); b.type = "button";
-      b.innerHTML = m.t === "img" ? `<img src="${esc(m.src)}" alt="">` : "▶ Video";
-      b.onclick = () => ver(m); $("d-th").append(b);
+      b.innerHTML = m.t === "img" ? `<img src="${esc(m.src)}" alt="" loading="lazy">` : "▶ Video";
+      b.onclick = () => ir(k); $("d-th").append(b);
     });
-    $("detalle").showModal();
+    $("detalle").onkeydown = e => { if (e.target.closest && e.target.closest("input, textarea")) return; if (e.key === "ArrowRight") ir(idx() + 1); if (e.key === "ArrowLeft") ir(idx() - 1); };
+    $("detalle").showModal(); if (track) { ir(0, false); marcar(); }
   }
   $("d-menos").onclick = () => { cant = Math.max(1, cant - 1); $("d-cant").textContent = cant; };
   $("d-mas").onclick = () => { cant++; $("d-cant").textContent = cant; };
