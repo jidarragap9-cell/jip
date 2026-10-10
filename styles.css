@@ -275,8 +275,16 @@ footer .ig { display: inline-flex; align-items: center; gap: 6px; }
 .hot{margin:0 0 26px;min-width:0}
 .hot .sec-h{flex-wrap:wrap;row-gap:2px}
 .hot .sec-h h2{color:#c2410c}
-.hot-row{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(200px,230px);gap:14px;overflow-x:auto;padding-bottom:8px;scroll-snap-type:x mandatory}
-.hot-row .card{scroll-snap-align:start;border-color:#e3b23c}
+.hot-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:18px}
+.hot-row .card{border:2px solid #e3b23c;border-radius:16px;box-shadow:0 6px 18px rgba(154,107,23,.12)}
+.hot-row .card .body{padding:14px 16px}
+.hot-row .card h3{font-size:16px;font-weight:600}
+.hot-row .card .price b{font-size:22px}
+.hot-row .card .buy{font-size:15px;padding:12px}
+.hot-mas{display:block;margin:18px auto 0;padding:11px 26px;border-radius:999px;border:2px solid #c2410c;background:#fff;color:#c2410c;font:600 14px var(--f-body);cursor:pointer}
+.hot-mas[hidden]{display:none}
+.hot-mas:hover{background:#c2410c;color:#fff}
+@media (max-width:760px){.hot-row{grid-template-columns:1fr 1fr;gap:10px}.hot-row .card .body{padding:10px}.hot-row .card h3{font-size:14px}.hot-row .card .price b{font-size:18px}}
 .badge.hot{background:#c2410c;color:#fff}
 .hot-cats{display:flex;gap:8px;overflow-x:auto;padding:0 0 10px;scrollbar-width:none}
 .hot-cats::-webkit-scrollbar{display:none}
