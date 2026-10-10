@@ -11,7 +11,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Outfit:wght@400;500;600;800&family=Allura&display=swap">
-<link rel="stylesheet" href="styles.css?v=202610102130">
+<link rel="stylesheet" href="styles.css?v=202610102132">
+<link rel="stylesheet" href="mina.css?v=202610102132">
 </head>
 <body>
 
@@ -90,6 +91,43 @@
     </div>
   </div>
   <div class="dots" id="dots" role="tablist" aria-label="Paneles"></div>
+  <div class="mina" id="mina">
+    <div class="birds" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="riel" aria-hidden="true"></div>
+    <div class="pico" aria-hidden="true">
+      <svg viewBox="0 0 160 110">
+        <path d="M0 110 C30 96 44 62 60 40 C68 28 72 18 77 15 C78 10 82 10 83 15 C88 18 92 28 100 40 C116 62 130 96 160 110 Z" fill="#241b10" stroke="#e3b23c" stroke-opacity=".55" stroke-width="1.5"/>
+        <path d="M40 84 l6 -12 l6 12z M112 82 l6 -12 l6 12z M50 70 l5 -10 l5 10z M104 68 l5 -10 l5 10z M30 98 l6 -12 l6 12z M124 96 l6 -12 l6 12z" fill="#1f3a22"/>
+        <path d="M64 110 V97 a16 16 0 0 1 32 0 V110" fill="#000" stroke="#8a5a2b" stroke-width="4"/>
+        <path d="M80 10 V-2 l10 4 l-10 4" fill="#e3b23c" stroke="#e3b23c" stroke-width="1"/>
+      </svg>
+      <span>Teta de San Lucas</span>
+    </div>
+    <button type="button" class="minero" id="minero" aria-label="Toca al minero para conocer un dato del Sur de Bolívar">
+      <span class="dato" id="dato" role="status"></span>
+      <svg viewBox="0 0 120 80" aria-hidden="true">
+        <g class="piernas"><path class="p1" d="M37 52 L32 77" /><path class="p2" d="M41 52 L46 77" /></g>
+        <g class="carro">
+          <path d="M60 38 H114 L108 64 H66 Z" fill="#5a4630" stroke="#e3b23c" stroke-width="1.5"/>
+          <path d="M66 46 H108 M68 55 H106" stroke="#3b2d1d" stroke-width="2"/>
+          <circle cx="72" cy="36" r="5" fill="#e3b23c"/><circle cx="82" cy="33" r="6" fill="#f2c84b"/><circle cx="93" cy="35" r="5" fill="#d9a531"/><circle cx="103" cy="36" r="4.5" fill="#f2c84b"/><circle cx="87" cy="29" r="3.5" fill="#ffe08a"/>
+          <g class="rueda" style="transform-origin:76px 70px"><circle cx="76" cy="70" r="7" fill="#1a140c" stroke="#e3b23c" stroke-width="1.5"/><path d="M69 70 H83 M76 63 V77" stroke="#e3b23c" stroke-width="1.2"/></g>
+          <g class="rueda" style="transform-origin:100px 70px"><circle cx="100" cy="70" r="7" fill="#1a140c" stroke="#e3b23c" stroke-width="1.5"/><path d="M93 70 H107 M100 63 V77" stroke="#e3b23c" stroke-width="1.2"/></g>
+        </g>
+        <path d="M44 36 L61 42" stroke="#c68a5a" stroke-width="4" stroke-linecap="round"/>
+        <rect x="30" y="29" width="17" height="25" rx="5" fill="#2f4a6b"/>
+        <path d="M30 41 H47" stroke="#e3b23c" stroke-width="2.5"/>
+        <circle cx="40" cy="20" r="7" fill="#c68a5a"/>
+        <path d="M31.5 19 a8.5 8.5 0 0 1 17 0 Z" fill="#e3b23c"/><path d="M30 19 H50" stroke="#c99a2e" stroke-width="2"/>
+        <circle cx="48" cy="15.5" r="2.2" fill="#fff6c0"/>
+        <g class="pica" style="transform-origin:35px 34px">
+          <path d="M35 34 L22 10" stroke="#8a5a2b" stroke-width="3" stroke-linecap="round"/>
+          <path d="M13 13 Q22 3 31 8" stroke="#b9c0c7" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+          <path d="M35 34 L44 37" stroke="#c68a5a" stroke-width="4" stroke-linecap="round"/>
+        </g>
+      </svg>
+    </button>
+  </div>
 </section>
 
 <main class="light gutter">
@@ -179,8 +217,9 @@
   </form>
 </dialog>
 
-<script src="config.js?v=202610102130"></script>
-<script src="envios.js?v=202610102130"></script>
-<script src="app.js?v=202610102130"></script>
+<script src="config.js?v=202610102132"></script>
+<script src="envios.js?v=202610102132"></script>
+<script src="app.js?v=202610102132"></script>
+<script src="mina.js?v=202610102132"></script>
 </body>
 </html>
