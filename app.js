@@ -87,7 +87,7 @@
   }
 
   // ---------- Estado ----------
-  let productos = [], ofertas = [], filtro = "Todos", subf = "", busqueda = "", hotCat = "";
+  let productos = [], ofertas = [], filtro = "Todos", subf = "", busqueda = "", hotCat = "", hotTodas = false;
   const ENC = "Por encargo", HOT = "Ofertas de hoy", E = T.encargo || { anticipo: 0.4, dias: 20 };
   const pct = Math.round(E.anticipo * 100);
   const anticipo = v => E.anticipo < 1 ? Math.ceil(v * E.anticipo / 1000) * 1000 : Math.min(E.anticipo, v);
@@ -183,8 +183,12 @@
     if (!cats.includes(hotCat)) hotCat = "";
     $("hot-cats").hidden = cats.length < 2;
     $("hot-cats").innerHTML = cats.length < 2 ? "" : ["", ...cats].map(c => `<button type="button" data-c="${esc(c)}" aria-pressed="${c === hotCat}">${c ? `<svg viewBox="0 0 24 24">${icon(c)}</svg>${esc(c)} <small>${l.filter(p => p.cat === c).length}</small>` : "Todas"}</button>`).join("");
-    $("hot-cats").querySelectorAll("button").forEach(b => b.onclick = () => { hotCat = b.dataset.c; pintarHot(q); });
-    $("hot-grid").innerHTML = ""; l.filter(p => !hotCat || p.cat === hotCat).forEach(p => $("hot-grid").append(tarjeta(p)));
+    $("hot-cats").querySelectorAll("button").forEach(b => b.onclick = () => { hotCat = b.dataset.c; hotTodas = false; pintarHot(q); });
+    // Tarjetas grandes en filas; se muestran las primeras y el resto con "Ver más ofertas"
+    const lh = l.filter(p => !hotCat || p.cat === hotCat), tope = hotTodas ? lh.length : 8;
+    $("hot-grid").innerHTML = ""; lh.slice(0, tope).forEach(p => $("hot-grid").append(tarjeta(p)));
+    $("hot-mas").hidden = lh.length <= tope; $("hot-mas").textContent = `Ver más ofertas (${lh.length - tope})`;
+    $("hot-mas").onclick = () => { hotTodas = true; pintarHot(q); };
   }
   function tarjeta(p) {
       // descuentos de 90 % o más son un error de datos: no se muestran
