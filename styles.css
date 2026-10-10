@@ -100,13 +100,22 @@ footer .in{align-items:center}
 .check input{width:auto;margin-top:3px}
 .check a{color:var(--gold-lo)}
 
-dialog{border:1px solid var(--gold-lo);border-radius:16px;background:var(--cream);color:var(--ink);padding:24px;width:min(900px,calc(100% - 24px));max-height:calc(100% - 24px)}
+dialog{border:1px solid var(--gold-lo);border-radius:16px;background:var(--cream);color:var(--ink);padding:24px;width:min(1080px,calc(100% - 24px));max-height:calc(100% - 24px)}
 dialog::backdrop{background:rgba(0,0,0,.7)}
 .cerrar{position:absolute;top:8px;right:12px;background:none;border:0;font-size:30px;line-height:1;cursor:pointer;color:inherit}
-.det{display:grid;grid-template-columns:1.1fr 1fr;gap:24px}
+.det{display:grid;grid-template-columns:1.3fr 1fr;gap:24px}
 .gal-main{aspect-ratio:1/1;max-width:100%;background:#fff;border-radius:12px;overflow:hidden;display:grid;place-items:center}
 .gal-main img,.gal-main iframe{width:100%;height:100%;object-fit:contain;border:0}
-.gal-th{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.gal-main{position:relative}
+.gal-track{display:flex;width:100%;height:100%;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain}
+.gal-track::-webkit-scrollbar{display:none}
+.gal-sl{flex:0 0 100%;height:100%;scroll-snap-align:center;display:grid;place-items:center}
+.gal-ar{position:absolute;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;border:0;background:rgba(10,9,7,.65);color:#fff;font-size:26px;line-height:1;cursor:pointer;display:grid;place-items:center}
+.gal-ar.prev{left:8px}.gal-ar.next{right:8px}.gal-ar:hover{background:var(--black)}
+.gal-dots{position:absolute;left:0;right:0;bottom:10px;display:flex;justify-content:center;gap:6px;pointer-events:none}
+.gal-dots i{width:8px;height:8px;border-radius:50%;background:rgba(0,0,0,.22)}.gal-dots i.on{background:var(--gold)}
+.gal-th{display:flex;gap:6px;margin-top:8px;overflow-x:auto;scrollbar-width:thin}
+.gal-th button{flex:0 0 auto}.gal-th button[aria-current="true"]{border:2px solid var(--gold)}
 .gal-th button{width:56px;height:56px;padding:0;border:1px solid var(--soft);border-radius:8px;overflow:hidden;cursor:pointer;background:#f1ece2;font-size:11px}
 .gal-th img{width:100%;height:100%;object-fit:cover}
 .info{display:grid;gap:10px;align-content:start;min-width:0}
