@@ -304,3 +304,6 @@ footer .ig { display: inline-flex; align-items: center; gap: 6px; }
 #listo button{padding:12px;border-radius:10px;font-weight:700;font-size:15px;cursor:pointer}
 #listo .l-pri{background:#e0b13a;color:#111;border:0}
 #listo .l-sec{background:transparent;border:1.5px solid #c9a24a;color:#8a6a1f}
+
+.sec-h .marca{font:600 13px var(--f-body);padding:8px 30px 8px 12px;border:1.5px solid var(--gold);border-radius:999px;background:#fffdf8;color:#1a1a1a;max-width:52%;cursor:pointer}
+.sec-h .marca[hidden]{display:none}

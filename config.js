@@ -37,6 +37,12 @@ window.TIENDA = {
   // Productos POR ENCARGO: el cliente separa con un anticipo y llega en X días hábiles.
   // En productos.csv escribe "Sí" en la columna "Encargo".
   // Subcategorías del menú (se pueden agregar más). En la hoja, columna "Subcategoría".
+  // Marcas que se reconocen en el nombre del producto para el filtro "Marca".
+  // Formato "Nombre que se muestra|otra forma de escribirla". En la hoja también puedes llenar la columna "Marca".
+  marcas: ["adidas", "Nike", "Puma", "Under Armour", "Reebok", "Champion", "Columbia", "Speedo", "Calvin Klein", "Tommy Hilfiger|Tommy Jeans",
+    "HUGO", "BOSS", "U.S. Polo Assn.", "Aéropostale", "Karl Lagerfeld", "Armani Exchange", "Von Dutch", "Casio", "TechnoMarine",
+    "UGREEN", "Ninja", "Chefman", "Revlon", "e.l.f.", "Vaseline", "Cetaphil", "CeraVe", "medicube", "Torriden", "SKIN1004", "SHEGLAM",
+    "Bath & Body Works", "eos", "L'Oréal|L’Oreal|L'Oreal", "TOCOBO", "Karseell", "Sports Research", "DERMATOUCH", "JIYU", "Monamii", "Avanova", "Seesii", "USX MOUNT"],
   subcategorias: {
     "Tecnología": ["Cargadores", "Cables", "Audífonos", "Relojes inteligentes", "Accesorios para celular"],
     "Belleza": ["Maquillaje", "Cuidado del cabello", "Cuidado de la piel", "Perfumes", "Uñas"],

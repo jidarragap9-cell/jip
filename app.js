@@ -62,7 +62,7 @@
     const c = {
       nombre: col("nombre", "producto"), precio: head.findIndex(h => h.startsWith("precio") && !h.includes("antes")),
       antes: col("antes", "anterior"), cat: head.findIndex(h => h.startsWith("categor")), sub: col("subcat"), specs: col("caracter", "especific", "descrip"),
-      fotos: col("foto", "imagen"), video: col("video"), peso: col("peso"), dest: col("destac", "ganador"), ocultar: col("ocultar", "agotado"), enc: col("encargo"), gar: col("garant"), tallas: col("talla"), cod: col("codigo")
+      fotos: col("foto", "imagen"), video: col("video"), peso: col("peso"), dest: col("destac", "ganador"), ocultar: col("ocultar", "agotado"), enc: col("encargo"), gar: col("garant"), tallas: col("talla"), cod: col("codigo"), marca: col("marca")
     };
     const g = (r, k) => (c[k] >= 0 ? (r[c[k]] || "").trim() : "");
     return rows.map((r, i) => ({
@@ -80,14 +80,18 @@
       ocultar: si(g(r, "ocultar")),
       enc: si(g(r, "enc")),
       gar: g(r, "gar"),
-      cod: g(r, "cod"),
+      cod: g(r, "cod"), marca: g(r, "marca"),
       // Tallas: "S, M, L:0" → la que tiene :0 está agotada
       tallas: g(r, "tallas").split(/[,;\n]+/).map(s => s.trim()).filter(Boolean).map(leerTalla)
-    })).map(soloOpcionesReales).filter(p => p.nombre && (p.precio || p.enc) && !p.ocultar).reverse(); // lo más nuevo primero
+    })).map(soloOpcionesReales).map(conMarca).filter(p => p.nombre && (p.precio || p.enc) && !p.ocultar).reverse(); // lo más nuevo primero
   }
 
   // ---------- Estado ----------
-  let productos = [], ofertas = [], filtro = "Todos", subf = "", busqueda = "", hotCat = "", hotTodas = false;
+  let productos = [], ofertas = [], filtro = "Todos", subf = "", busqueda = "", hotCat = "", hotTodas = false, marca = "";
+  // Marca: la de la columna "Marca" de la hoja o, si está vacía, la que aparezca en el nombre (lista en config.js)
+  const MARCAS = (T.marcas || []).map(m => { const [n, ...al] = m.split("|"); return { n, re: [n, ...al].map(x => new RegExp(`(^|[^a-z0-9])${norm(x).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}([^a-z0-9]|$)`)) }; });
+  function conMarca(p) { if (!p.marca) { const s = norm(p.nombre), m = MARCAS.find(m => m.re.some(r => r.test(s))); p.marca = m ? m.n : ""; } return p; }
+  const deMarca = p => !marca || p.marca === marca;
   const ENC = "Por encargo", HOT = "Ofertas de hoy", E = T.encargo || { anticipo: 0.4, dias: 20 };
   const pct = Math.round(E.anticipo * 100);
   const anticipo = v => E.anticipo < 1 ? Math.ceil(v * E.anticipo / 1000) * 1000 : Math.min(E.anticipo, v);
@@ -159,9 +163,10 @@
     categorias();
     const q = norm(busqueda);
     pintarHot(q);
-    let lista = todos().filter(p => !(filtro === "Todos" && !q && p.hot)).filter(p => enCat(p, filtro) && (!q || norm(p.nombre + " " + p.cod + " " + p.cat + " " + p.sub + " " + p.specs.join(" ")).includes(q)));
+    pintarMarcas();
+    let lista = todos().filter(p => !(filtro === "Todos" && !q && p.hot)).filter(p => enCat(p, filtro) && deMarca(p) && (!q || norm(p.nombre + " " + p.cod + " " + p.marca + " " + p.cat + " " + p.sub + " " + p.specs.join(" ")).includes(q)));
     if (filtro === "Todos" && !q) lista = [...lista.filter(p => p.dest), ...lista.filter(p => !p.dest)];
-    $("titulo").textContent = q ? `Resultados para “${busqueda}”` : filtro === "Todos" ? "Productos destacados" : subf ? `${filtro} › ${subf}` : filtro;
+    $("titulo").textContent = (q ? `Resultados para “${busqueda}”` : filtro === "Todos" ? (marca ? "Productos" : "Productos destacados") : subf ? `${filtro} › ${subf}` : filtro) + (marca ? ` · ${marca}` : "");
     const grid = $("grid"); grid.innerHTML = "";
     $("enc-intro").hidden = filtro !== ENC || !!q;
     if (filtro === ENC && !q) $("enc-intro").innerHTML = `<h3>⏳ Aparta productos innovadores</h3>
@@ -174,9 +179,19 @@
     if (!lista.length) { grid.innerHTML = filtro === ENC && !q ? '<p class="empty">Muy pronto publicaremos aquí productos innovadores para apartar. ¿Buscas algo en especial? Escríbenos por WhatsApp y te lo conseguimos.</p>' : subf && !q ? `<p class="empty">Muy pronto tendremos productos de <b>${esc(subf)}</b>. ¿Buscas algo en especial? Escríbenos por WhatsApp y te lo conseguimos.</p>` : '<p class="empty">No encontramos productos. Prueba con otra búsqueda.</p>'; return; }
     lista.forEach(p => grid.append(tarjeta(p)));
   }
+  // Filtro por marca: solo las marcas que hay en la categoría elegida
+  function pintarMarcas() {
+    const sel = $("marca"), cuenta = {};
+    todos().filter(p => enCat(p, filtro) && p.marca).forEach(p => { cuenta[p.marca] = (cuenta[p.marca] || 0) + 1; });
+    const ms = Object.keys(cuenta).sort((a, b) => a.localeCompare(b, "es", { sensitivity: "base" }));
+    if (marca && !cuenta[marca]) marca = "";
+    sel.hidden = ms.length < 2 && !marca;
+    sel.innerHTML = `<option value="">Todas las marcas</option>` + ms.map(m => `<option value="${esc(m)}"${m === marca ? " selected" : ""}>${esc(m)} (${cuenta[m]})</option>`).join("");
+  }
+  $("marca").onchange = e => { marca = e.target.value; hotTodas = false; pintar(); };
   // Franja "Ofertas de hoy" arriba de la vitrina
   function pintarHot(q) {
-    const l = vigentes(), ver = filtro === "Todos" && !q && l.length;
+    const l = vigentes().filter(deMarca), ver = filtro === "Todos" && !q && l.length;
     $("hot").hidden = !ver; if (!ver) return;
     // Botones por categoría (solo si las ofertas son de varias categorías) para encontrar rápido lo que se busca
     const cats = [...new Set(l.map(p => p.cat))];
@@ -481,9 +496,9 @@
       const r = await fetch(T.ofertasURL + "?accion=ofertas&t=" + Date.now());
       ofertas = (await r.json()).map((o, i) => ({
         id: "hot" + i, hot: true, enc: true, nombre: o.nombre, precio: num(o.precio), antes: num(o.antes), cat: o.cat || "Otros", sub: o.sub || "", cod: "",
-        specs: o.specs || [], fotos: (o.fotos || []).map(toImg), video: "", peso: 1, dest: false, gar: "por defectos de fábrica", vence: Date.parse(o.vence),
+        specs: o.specs || [], fotos: (o.fotos || []).map(toImg), video: "", peso: 1, dest: false, gar: "por defectos de fábrica", vence: Date.parse(o.vence), marca: o.marca || "",
         tallas: String(o.tallas || "").split(/[,;\n]+/).map(s => s.trim()).filter(Boolean).map(leerTalla)
-      })).map(soloOpcionesReales).filter(o => o.nombre && o.precio && o.vence > Date.now());
+      })).map(soloOpcionesReales).map(conMarca).filter(o => o.nombre && o.precio && o.vence > Date.now());
       pintar();
     } catch { }
   }
