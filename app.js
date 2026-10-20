@@ -207,18 +207,46 @@
     $("hot-mas").hidden = lh.length <= tope; $("hot-mas").textContent = `Ver más ofertas (${lh.length - tope})`;
     $("hot-mas").onclick = () => { hotTodas = true; pintarHot(q); };
   }
+  // Galería deslizable reutilizable (tarjetas y visor de fotos)
+  function galeria(cont, fotos, alt, alTocar, perezosa) {
+    cont.insertAdjacentHTML("afterbegin", `<div class="gal-track">${fotos.map(src => `<div class="gal-sl"><img src="${esc(src)}" alt="${esc(alt)}"${perezosa ? ' loading="lazy"' : ""}></div>`).join("")}</div>${fotos.length > 1 ? `<button type="button" class="gal-ar prev" aria-label="Foto anterior">‹</button><button type="button" class="gal-ar next" aria-label="Foto siguiente">›</button><div class="gal-dots">${fotos.map(() => "<i></i>").join("")}</div>` : ""}`);
+    const track = cont.querySelector(".gal-track");
+    const idx = () => Math.round(track.scrollLeft / (track.clientWidth || 1));
+    const ir = (i, suave = true) => { i = (i + fotos.length) % fotos.length; track.scrollTo({ left: i * track.clientWidth, behavior: suave ? "smooth" : "auto" }); };
+    const marcar = () => { const i = idx(); cont.querySelectorAll(".gal-dots i").forEach((d, k) => d.classList.toggle("on", k === i)); cont.dispatchEvent(new CustomEvent("foto", { detail: i })); };
+    track.onscroll = () => requestAnimationFrame(marcar);
+    cont.querySelector(".prev")?.addEventListener("click", e => { e.stopPropagation(); ir(idx() - 1); });
+    cont.querySelector(".next")?.addEventListener("click", e => { e.stopPropagation(); ir(idx() + 1); });
+    if (alTocar) track.addEventListener("click", () => alTocar(idx()));
+    marcar();
+    return { ir, idx };
+  }
+  // Visor: las fotos en grande en una ventana encima de todo
+  function visor(fotos, i = 0, alt = "") {
+    const d = $("visor"), cont = $("v-gal");
+    cont.innerHTML = "";
+    const g = galeria(cont, fotos, alt, null, false);
+    const num = n => { $("v-num").textContent = fotos.length > 1 ? `${n + 1} / ${fotos.length}` : ""; };
+    cont.addEventListener("foto", e => num(e.detail));
+    d.onkeydown = e => { if (e.key === "ArrowRight") g.ir(g.idx() + 1); if (e.key === "ArrowLeft") g.ir(g.idx() - 1); };
+    d.showModal(); g.ir(i, false); num(i);
+  }
+  $("v-cerrar").onclick = () => $("visor").close();
+  $("visor").addEventListener("click", e => { if (e.target === $("visor")) $("visor").close(); });
+
   function tarjeta(p) {
       // descuentos de 90 % o más son un error de datos: no se muestran
       const off0 = p.antes > p.precio ? Math.round(100 - p.precio * 100 / p.antes) : 0, off = off0 < 90 ? off0 : 0;
       const el = document.createElement("article"); el.className = "card";
-      el.innerHTML = `<button class="open" type="button" aria-label="Ver ${esc(p.nombre)}">
-        <div class="media">${p.fotos[0] ? `<img src="${esc(p.fotos[0])}" alt="" loading="lazy">` : '<span class="ph">J&amp;P</span>'}
+      el.innerHTML = `<div class="media">${p.fotos[0] ? "" : '<span class="ph">J&amp;P</span>'}
         ${p.hot && off ? '<span class="badge hot">🔥 Promoción</span>' : p.dest && !p.hot ? '<span class="badge">Destacado</span>' : ""}${off ? `<span class="badge off">-${off}%</span>` : ""}${p.hot && !fija(p.vence) ? `<span class="badge reloj">⏱ Termina en ${quedan(p.vence)}</span>` : p.hot ? '<span class="badge enc">⏳ Bajo pedido</span>' : p.enc ? '<span class="badge enc">⏳ Por encargo</span>' : '<span class="badge ya">✅ Entrega inmediata</span>'}</div>
-        <div class="body"><span class="cat-tag">${esc(p.sub ? `${p.cat} · ${p.sub}` : p.cat)}</span><h3>${esc(p.nombre)}</h3>
+        <button class="open" type="button" aria-label="Ver ${esc(p.nombre)}"><div class="body"><span class="cat-tag">${esc(p.sub ? `${p.cat} · ${p.sub}` : p.cat)}</span><h3>${esc(p.nombre)}</h3>
         ${p.hot ? "" : `<ul class="specs">${p.specs.slice(0, 2).map(s => `<li>${esc(s)}</li>`).join("")}</ul>`}
-        ${p.hot ? `<div class="price">${desde(p) ? "<small>Desde</small> " : ""}<b>${fmt(p.precio)}</b>${off ? `<s>${fmt(p.antes)}</s>` : ""}</div><p class="sep">⏳ Por encargo · apártalo con <b>${fmt(anticipo(p.precio))}</b> · llega en ${E.dias} días hábiles</p>` : p.enc ? `<div class="price cot"><b>Precio a consultar</b></div><p class="sep">Apártalo con <b>${antTxt}</b> · llega en ${E.dias} días hábiles</p>` : `<div class="price"><b>${fmt(p.precio)}</b>${off ? `<s>${fmt(p.antes)}</s>` : ""}</div>`}${p.tallas.length ? `<div class="mini-tallas">${p.tallas.map(x => `<span class="${x.ok ? "" : "off"}">${(conPres(p) ? presMedida(x.t)[0] : convTalla(x.t, tipoTalla(p))[0])}</span>`).join("")}</div>` : ""}</div></button>
+        ${p.hot ? `<div class="price">${desde(p) ? "<small>Desde</small> " : ""}<b>${fmt(p.precio)}</b>${off ? `<s>${fmt(p.antes)}</s>` : ""}</div><p class="sep">⏳ Por encargo · apártalo con <b>${fmt(anticipo(p.precio))}</b> · llega en ${E.dias} días hábiles</p>` : p.enc ? `<div class="price cot"><b>Precio a consultar</b></div><p class="sep">Apártalo con <b>${antTxt}</b> · llega en ${E.dias} días hábiles</p>` : `<div class="price"><b>${fmt(p.precio)}</b>${off ? `<s>${fmt(p.antes)}</s>` : ""}</div>`}</div></button>
         <button class="buy" type="button">${p.tallas.length ? (p.hot ? "Apartar" : "Comprar") : p.hot ? "Apartar" : p.enc ? "💬 Cotizar por WhatsApp" : "Agregar al carrito"}</button>`;
       el.querySelector(".open").onclick = () => abrir(p);
+      // Fotos de la tarjeta: se pasan con el dedo o las flechas; al tocar una se abre en grande
+      if (p.fotos.length) galeria(el.querySelector(".media"), p.fotos, p.nombre, i => visor(p.fotos, i, p.nombre), true);
       el.querySelector(".buy").onclick = e => { if (p.tallas.length) return abrir(p); if (!conPrecio(p)) return cotizar(p); agregar(p, 1); e.target.textContent = "Agregado ✓"; preguntar(p); };
       return el;
   }
@@ -303,6 +331,7 @@
     const ir = (i, suave = true) => { if (!track) return; i = (i + medios.length) % medios.length; track.scrollTo({ left: i * track.clientWidth, behavior: suave ? "smooth" : "auto" }); };
     const marcar = () => { const i = idx(); $("d-main").querySelectorAll(".gal-dots i").forEach((d, k) => d.classList.toggle("on", k === i)); $("d-th").querySelectorAll("button").forEach((b, k) => b.setAttribute("aria-current", k === i)); };
     const ver = m => { const i = m ? medios.findIndex(x => x.src === m.src) : -1; if (i >= 0) ir(i); };
+    if (track && p.fotos.length) track.onclick = e => { if (e.target.tagName === "IMG") visor(p.fotos, Math.min(idx(), p.fotos.length - 1), p.nombre); };
     if (track) { track.onscroll = () => requestAnimationFrame(marcar); $("d-main").querySelector(".prev")?.addEventListener("click", () => ir(idx() - 1)); $("d-main").querySelector(".next")?.addEventListener("click", () => ir(idx() + 1)); }
     $("d-th").innerHTML = "";
     if (medios.length > 1) medios.forEach((m, k) => {
