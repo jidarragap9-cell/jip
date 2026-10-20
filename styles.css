@@ -332,3 +332,13 @@ footer .ig { display: inline-flex; align-items: center; gap: 6px; }
 .card .media .zoom{all:unset;position:absolute;inset:0;cursor:zoom-in;display:grid;place-items:center}
 .card .media .zoom img{width:100%;height:100%;object-fit:contain}
 .card .media .nfotos{position:absolute;right:8px;bottom:8px;z-index:2;padding:3px 8px;border-radius:999px;background:rgba(10,9,7,.7);color:#fff;font:600 11px var(--f-body);pointer-events:none}
+/* Barra de filtros: género, marca, precio y orden */
+.filtros{display:grid;gap:10px;margin:4px 0 18px;padding:12px;border:1px solid var(--soft);border-radius:14px;background:#fffdf8}
+.f-gen{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
+.f-gen::-webkit-scrollbar{display:none}
+.f-gen[hidden],.f-sel [hidden]{display:none}
+.f-gen button{flex:none;padding:8px 16px;border-radius:999px;border:1.5px solid #e3b23c;background:#fff;color:#1a1408;font:600 13px var(--f-body);cursor:pointer}
+.f-gen button[aria-pressed="true"]{background:#1a1408;color:#e3b23c;border-color:#1a1408}
+.f-sel{display:flex;flex-wrap:wrap;gap:8px}
+.f-sel select{flex:1 1 140px;min-width:0;font:600 13px var(--f-body);padding:9px 12px;border:1.5px solid var(--soft);border-radius:10px;background:#fff;color:#1a1a1a;cursor:pointer}
+.f-limpiar{flex:none;padding:9px 12px;border:0;border-radius:10px;background:transparent;color:#a3361a;font:700 13px var(--f-body);cursor:pointer}

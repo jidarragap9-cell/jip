@@ -11,8 +11,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Outfit:wght@400;500;600;800&family=Allura&display=swap">
-<link rel="stylesheet" href="styles.css?v=202610200149">
-<link rel="stylesheet" href="mina.css?v=202610200149">
+<link rel="stylesheet" href="styles.css?v=202610200257">
+<link rel="stylesheet" href="mina.css?v=202610200257">
 </head>
 <body>
 
@@ -165,6 +165,15 @@
 <main class="light gutter">
   <div class="in">
     <div class="icons" id="icons"></div>
+    <div class="filtros" id="filtros" role="search" aria-label="Filtrar productos">
+      <div class="f-gen" id="f-gen" role="group" aria-label="Género" hidden></div>
+      <div class="f-sel">
+        <select id="marca" aria-label="Marca" hidden></select>
+        <select id="f-precio" aria-label="Precio"></select>
+        <select id="f-orden" aria-label="Ordenar"><option value="">Recomendados</option><option value="menor">Menor precio</option><option value="mayor">Mayor precio</option></select>
+        <button type="button" id="f-limpiar" class="f-limpiar" hidden>✕ Limpiar filtros</button>
+      </div>
+    </div>
     <section id="hot" class="hot" hidden>
       <div class="sec-h"><h2>🔥 Ofertas de hoy</h2><small>Bajo pedido · apártalos con un abono</small></div>
       <div class="hot-cats" id="hot-cats" hidden></div>
@@ -172,7 +181,7 @@
       <button type="button" class="hot-mas" id="hot-mas" hidden></button>
     </section>
     <section id="vitrina">
-      <div class="sec-h"><h2 id="titulo">Productos destacados</h2><select id="marca" class="marca" aria-label="Filtrar por marca" hidden></select></div>
+      <div class="sec-h"><h2 id="titulo">Productos destacados</h2></div>
       <div class="enc-intro" id="enc-intro" hidden></div>
       <div class="grid" id="grid"><p class="empty">Cargando productos…</p></div>
     </section>
@@ -257,9 +266,9 @@
   </form>
 </dialog>
 
-<script src="config.js?v=202610200149"></script>
-<script src="envios.js?v=202610200149"></script>
-<script src="app.js?v=202610200149"></script>
-<script src="mina.js?v=202610200149"></script>
+<script src="config.js?v=202610200257"></script>
+<script src="envios.js?v=202610200257"></script>
+<script src="app.js?v=202610200257"></script>
+<script src="mina.js?v=202610200257"></script>
 </body>
 </html>

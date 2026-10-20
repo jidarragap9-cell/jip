@@ -87,11 +87,24 @@
   }
 
   // ---------- Estado ----------
-  let productos = [], ofertas = [], filtro = "Todos", subf = "", busqueda = "", hotCat = "", hotTodas = false, marca = "";
+  let productos = [], ofertas = [], filtro = "Todos", subf = "", busqueda = "", hotCat = "", hotTodas = false, marca = "", genero = "", rango = "", orden = "";
   // Marca: la de la columna "Marca" de la hoja o, si está vacía, la que aparezca en el nombre (lista en config.js)
   const MARCAS = (T.marcas || []).map(m => { const [n, ...al] = m.split("|"); return { n, re: [n, ...al].map(x => new RegExp(`(^|[^a-z0-9])${norm(x).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}([^a-z0-9]|$)`)) }; });
   function conMarca(p) { if (!p.marca) { const s = norm(p.nombre), m = MARCAS.find(m => m.re.some(r => r.test(s))); p.marca = m ? m.n : ""; } return p; }
   const deMarca = p => !marca || p.marca === marca;
+  // Género: sale del nombre y la subcategoría ("hombre", "mujer", "niños"…); unisex cuenta para hombre y mujer
+  const GEN = { h: "Hombre", m: "Mujer", n: "Niños" };
+  function generoDe(p) {
+    const s = norm(p.nombre + " " + p.sub + " " + p.cat);
+    if (/\b(nin[oa]s?|bebes?|infantil|kids?|junior|jovenes|toddler)\b/.test(s)) return "n";
+    const h = /\b(hombres?|caballeros?|masculin[oa]|mens?)\b/.test(s), m = /\b(mujer(es)?|damas?|femenin[oa]|womens?|wmns)\b/.test(s);
+    return /\bunisex\b/.test(s) || (h && m) ? "u" : h ? "h" : m ? "m" : "";
+  }
+  const deGenero = p => !genero || (p.gen ??= generoDe(p)) === genero || (p.gen === "u" && genero !== "n");
+  const RANGOS = { a: [0, 100000, "Hasta $100.000"], b: [100000, 200000, "$100.000 a $200.000"], c: [200000, 400000, "$200.000 a $400.000"], d: [400000, Infinity, "Más de $400.000"] };
+  const dePrecio = p => !rango || (p.precio > RANGOS[rango][0] && p.precio <= RANGOS[rango][1]);
+  const pasa = p => deMarca(p) && deGenero(p) && dePrecio(p);
+  const ordenar = l => orden === "menor" ? [...l].sort((x, y) => (x.precio || 1e12) - (y.precio || 1e12)) : orden === "mayor" ? [...l].sort((x, y) => y.precio - x.precio) : l;
   const ENC = "Por encargo", HOT = "Ofertas de hoy", E = T.encargo || { anticipo: 0.4, dias: 20 };
   const pct = Math.round(E.anticipo * 100);
   const anticipo = v => E.anticipo < 1 ? Math.ceil(v * E.anticipo / 1000) * 1000 : Math.min(E.anticipo, v);
@@ -166,8 +179,9 @@
     const q = norm(busqueda);
     pintarHot(q);
     pintarMarcas();
-    let lista = todos().filter(p => !(filtro === "Todos" && !q && p.hot)).filter(p => enCat(p, filtro) && deMarca(p) && (!q || norm(p.nombre + " " + p.cod + " " + p.marca + " " + p.cat + " " + p.sub + " " + p.specs.join(" ")).includes(q)));
+    let lista = todos().filter(p => !(filtro === "Todos" && !q && p.hot)).filter(p => enCat(p, filtro) && pasa(p) && (!q || norm(p.nombre + " " + p.cod + " " + p.marca + " " + p.cat + " " + p.sub + " " + p.specs.join(" ")).includes(q)));
     if (filtro === "Todos" && !q) lista = [...lista.filter(p => p.dest), ...lista.filter(p => !p.dest)];
+    lista = ordenar(lista);
     $("titulo").textContent = (q ? `Resultados para “${busqueda}”` : filtro === "Todos" ? (marca ? "Productos" : "Productos destacados") : subf ? `${filtro} › ${subf}` : filtro) + (marca ? ` · ${marca}` : "");
     const grid = $("grid"); grid.innerHTML = "";
     $("enc-intro").hidden = filtro !== ENC || !!q;
@@ -181,19 +195,31 @@
     if (!lista.length) { grid.innerHTML = filtro === ENC && !q ? '<p class="empty">Muy pronto publicaremos aquí productos innovadores para apartar. ¿Buscas algo en especial? Escríbenos por WhatsApp y te lo conseguimos.</p>' : subf && !q ? `<p class="empty">Muy pronto tendremos productos de <b>${esc(subf)}</b>. ¿Buscas algo en especial? Escríbenos por WhatsApp y te lo conseguimos.</p>` : '<p class="empty">No encontramos productos. Prueba con otra búsqueda.</p>'; return; }
     lista.forEach(p => grid.append(tarjeta(p)));
   }
-  // Filtro por marca: solo las marcas que hay en la categoría elegida
+  // Barra de filtros: género, marca, precio y orden (aplican a las ofertas y a la vitrina)
   function pintarMarcas() {
+    const base = todos().filter(p => enCat(p, filtro));
+    const gens = ["h", "m", "n"].filter(g => base.some(p => (p.gen ??= generoDe(p)) === g || (g !== "n" && p.gen === "u")));
+    if (genero && !gens.includes(genero)) genero = "";
+    $("f-gen").hidden = gens.length < 2;
+    $("f-gen").innerHTML = ["", ...gens].map(g => `<button type="button" data-g="${g}" aria-pressed="${g === genero}">${g ? GEN[g] : "Todos"}</button>`).join("");
+    $("f-gen").querySelectorAll("button").forEach(b => b.onclick = () => { genero = b.dataset.g; hotTodas = false; pintar(); });
+    $("f-precio").value = rango; $("f-orden").value = orden;
+    $("f-limpiar").hidden = !(genero || marca || rango || orden);
     const sel = $("marca"), cuenta = {};
-    todos().filter(p => enCat(p, filtro) && p.marca).forEach(p => { cuenta[p.marca] = (cuenta[p.marca] || 0) + 1; });
+    base.filter(p => deGenero(p) && p.marca).forEach(p => { cuenta[p.marca] = (cuenta[p.marca] || 0) + 1; });
     const ms = Object.keys(cuenta).sort((a, b) => a.localeCompare(b, "es", { sensitivity: "base" }));
     if (marca && !cuenta[marca]) marca = "";
     sel.hidden = ms.length < 2 && !marca;
     sel.innerHTML = `<option value="">Todas las marcas</option>` + ms.map(m => `<option value="${esc(m)}"${m === marca ? " selected" : ""}>${esc(m)} (${cuenta[m]})</option>`).join("");
   }
   $("marca").onchange = e => { marca = e.target.value; hotTodas = false; pintar(); };
+  $("f-precio").innerHTML = `<option value="">Cualquier precio</option>` + Object.entries(RANGOS).map(([k, r]) => `<option value="${k}">${r[2]}</option>`).join("");
+  $("f-precio").onchange = e => { rango = e.target.value; hotTodas = false; pintar(); };
+  $("f-orden").onchange = e => { orden = e.target.value; pintar(); };
+  $("f-limpiar").onclick = () => { genero = marca = rango = orden = ""; hotTodas = false; pintar(); };
   // Franja "Ofertas de hoy" arriba de la vitrina
   function pintarHot(q) {
-    const l = vigentes().filter(deMarca), ver = filtro === "Todos" && !q && l.length;
+    const l = ordenar(vigentes().filter(pasa)), ver = filtro === "Todos" && !q && l.length;
     $("hot").hidden = !ver; if (!ver) return;
     // Botones por categoría (solo si las ofertas son de varias categorías) para encontrar rápido lo que se busca
     const cats = [...new Set(l.map(p => p.cat))];
