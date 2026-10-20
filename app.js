@@ -245,8 +245,12 @@
         ${p.hot ? `<div class="price">${desde(p) ? "<small>Desde</small> " : ""}<b>${fmt(p.precio)}</b>${off ? `<s>${fmt(p.antes)}</s>` : ""}</div><p class="sep">⏳ Por encargo · apártalo con <b>${fmt(anticipo(p.precio))}</b> · llega en ${E.dias} días hábiles</p>` : p.enc ? `<div class="price cot"><b>Precio a consultar</b></div><p class="sep">Apártalo con <b>${antTxt}</b> · llega en ${E.dias} días hábiles</p>` : `<div class="price"><b>${fmt(p.precio)}</b>${off ? `<s>${fmt(p.antes)}</s>` : ""}</div>`}</div></button>
         <button class="buy" type="button">${p.tallas.length ? (p.hot ? "Apartar" : "Comprar") : p.hot ? "Apartar" : p.enc ? "💬 Cotizar por WhatsApp" : "Agregar al carrito"}</button>`;
       el.querySelector(".open").onclick = () => abrir(p);
-      // Fotos de la tarjeta: se pasan con el dedo o las flechas; al tocar una se abre en grande
-      if (p.fotos.length) galeria(el.querySelector(".media"), p.fotos, p.nombre, i => visor(p.fotos, i, p.nombre), true);
+      // Foto fija en la tarjeta: al tocarla se abren todas en grande
+      if (p.fotos.length) {
+        const m = el.querySelector(".media");
+        m.insertAdjacentHTML("afterbegin", `<button type="button" class="zoom" aria-label="Ver fotos de ${esc(p.nombre)}"><img src="${esc(p.fotos[0])}" alt="" loading="lazy">${p.fotos.length > 1 ? `<span class="nfotos">📷 ${p.fotos.length}</span>` : ""}</button>`);
+        m.querySelector(".zoom").onclick = () => visor(p.fotos, 0, p.nombre);
+      }
       el.querySelector(".buy").onclick = e => { if (p.tallas.length) return abrir(p); if (!conPrecio(p)) return cotizar(p); agregar(p, 1); e.target.textContent = "Agregado ✓"; preguntar(p); };
       return el;
   }
